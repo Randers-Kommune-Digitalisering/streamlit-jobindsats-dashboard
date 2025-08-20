@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from io import BytesIO
 from utils.database_connection import get_jobindsats_db
 
 db_client = get_jobindsats_db()
@@ -31,8 +32,8 @@ def get_sygedagpenge_overview():
         df = st.session_state.sygedagpenge_data
 
         month_map = {
-            1: "Januar", 2: "Februar", 3: "Marts", 4: "April", 5: "Maj", 6: "Juni",
-            7: "Juli", 8: "August", 9: "September", 10: "Oktober", 11: "November", 12: "December"
+            1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "Maj", 6: "Jun",
+            7: "Jul", 8: "Aug", 9: "Sep", 10: "Okt", 11: "Nov", 12: "Dec"
         }
 
         df["Periode Sygedagpenge"] = pd.to_datetime(df["Periode Sygedagpenge"], errors='coerce')
@@ -48,10 +49,7 @@ def get_sygedagpenge_overview():
         chart_df = df[(df["År"] == selected_year)].dropna(subset=["MånedNavn", "Område", "Værdi"])
         chart_df = chart_df[["Måned", "MånedNavn", "Område", "Værdi"]]
 
-        month_order = [
-            "Januar", "Februar", "Marts", "April", "Maj", "Juni",
-            "Juli", "August", "September", "Oktober", "November", "December"
-        ]
+        month_order = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
         chart_df["MånedNavn"] = pd.Categorical(chart_df["MånedNavn"], categories=month_order, ordered=True)
 
         st.header(f"Varighed i afsluttede sygedagpengeforløb - {selected_year}", divider="gray")
@@ -67,6 +65,24 @@ def get_sygedagpenge_overview():
         ).properties(width=700, height=400)
 
         st.altair_chart(chart, use_container_width=True)
+
+        export_df = chart_df.copy()
+        export_df["Periode"] = export_df["MånedNavn"].astype(str) + " " + selected_year
+        export_df = export_df[["Periode", "Område", "Værdi"]]
+        export_df = export_df.rename(columns={"Værdi": "Gnsn. varighed af afsluttede forløb (uger)"})
+        export_df["Gnsn. varighed af afsluttede forløb (uger)"] = export_df["Gnsn. varighed af afsluttede forløb (uger)"].map(lambda x: str(x).replace('.', ','))  # dansk decimal
+
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            export_df.to_excel(writer, index=False, sheet_name='Sygedagpenge')
+        output.seek(0)
+
+        st.download_button(
+            label="Eksporter data til Excel",
+            data=output,
+            file_name=f"sygedagpenge_{selected_year}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
     except Exception as e:
         st.error(f'Fejl ved hentning af sygedagpenge data: {e}')
