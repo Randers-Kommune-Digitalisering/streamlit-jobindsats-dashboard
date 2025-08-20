@@ -1,18 +1,18 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
-from page.template import get_template_overview
+from page.sygedagpenge import get_sygedagpenge_overview
 
-st.set_page_config(page_title="Streamlit Template Dashboard", page_icon="assets/favicon.ico")
+st.set_page_config(page_title="Jobindsats Dashboard", page_icon="assets/favicon.ico")
 
 with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
-        "Streamlit Template Dashboard",
-        ["Template"],
+        "Jobindsats Dashboard",
+        ["Sygedagpenge", "Jobindsats Overblik", "Aktiverede", "Fuldtidspersoner på offentlig forsørgelse"],
         default_index=0,
-        icons=['bi bi-card-list'],
-        menu_icon="bi bi-person-lines-fill",
+        icons=['bi bi-hospital', 'bi bi-bar-chart-line', 'bi bi-person-check', 'bi bi-people-fill'],
+        menu_icon="bi bi-briefcase",
         styles={
             "container": {"padding": "5px", "background-color": "#f0f0f0"},
             "icon": {"color": "#4a4a4a", "font-size": "18px"},
@@ -22,5 +22,5 @@ with st.sidebar:
         }
     )
 
-if selected == "Template":
-    get_template_overview()
+if selected == "Sygedagpenge":
+    get_sygedagpenge_overview()
