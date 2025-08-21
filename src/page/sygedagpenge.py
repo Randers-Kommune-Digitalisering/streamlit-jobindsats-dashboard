@@ -44,7 +44,7 @@ def get_sygedagpenge_overview():
         df["Værdi"] = pd.to_numeric(df["Gnsn. varighed af afsluttede forløb (uger)"], errors="coerce").round(1)
 
         available_years = sorted(df["År"].unique())
-        selected_year = st.selectbox("Vælg år", available_years, index=len(available_years)-1)
+        selected_year = st.selectbox("Vælg år", available_years, index=len(available_years) - 1)
 
         chart_df = df[(df["År"] == selected_year)].dropna(subset=["MånedNavn", "Område", "Værdi"])
         chart_df = chart_df[["Måned", "MånedNavn", "Område", "Værdi"]]
@@ -70,7 +70,7 @@ def get_sygedagpenge_overview():
         export_df["Periode"] = export_df["MånedNavn"].astype(str) + " " + selected_year
         export_df = export_df[["Periode", "Område", "Værdi"]]
         export_df = export_df.rename(columns={"Værdi": "Gnsn. varighed af afsluttede forløb (uger)"})
-        export_df["Gnsn. varighed af afsluttede forløb (uger)"] = export_df["Gnsn. varighed af afsluttede forløb (uger)"].map(lambda x: str(x).replace('.', ','))  # dansk decimal
+        export_df["Gnsn. varighed af afsluttede forløb (uger)"] = export_df["Gnsn. varighed af afsluttede forløb (uger)"].map(lambda x: str(x).replace('.', ','))
 
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
