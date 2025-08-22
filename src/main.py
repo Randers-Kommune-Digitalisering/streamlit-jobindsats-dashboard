@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
 from page.sygedagpenge import get_sygedagpenge_overview
+from page.jobindsats_overview import show_jobindsats_metadata_overview
 
 st.set_page_config(page_title="Jobindsats Dashboard", page_icon="assets/favicon.ico")
 
@@ -24,3 +25,5 @@ with st.sidebar:
 
 if selected == "Sygedagpenge":
     get_sygedagpenge_overview()
+elif selected == "Jobindsats Overblik":
+    show_jobindsats_metadata_overview()
