@@ -81,7 +81,9 @@ def get_sygedagpenge_overview():
             label="Eksporter data til Excel",
             data=output,
             file_name=f"sygedagpenge_{selected_year}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            type="primary",
+            icon=":material/add_chart:"
         )
 
     except Exception as e:
