@@ -35,7 +35,7 @@ def show_jobindsats_metadata_overview():
         if search_query.strip():
             filtered_df = filtered_df[
                 filtered_df["SubjectName"].str.contains(search_query, case=False, na=False) |
-                filtered_df["TableName"].str.contains(search_query, case=False, na=False)
+                filtered_df["TableID"].str.contains(search_query, case=False, na=False)
             ]
 
         st.markdown(
