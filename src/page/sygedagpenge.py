@@ -56,6 +56,7 @@ def get_sygedagpenge_overview():
         chart = alt.Chart(chart_df).mark_bar().encode(
             x=alt.X('MånedNavn:N', title='Måned', sort=month_order),
             y=alt.Y('Værdi:Q', title='Gnsn. varighed af afsluttede forløb (uger)'),
+            xOffset=alt.XOffset('Område:N', title='Område'),
             color=alt.Color('Område:N', title='Område'),
             tooltip=[
                 alt.Tooltip('MånedNavn:N', title='Måned'),
