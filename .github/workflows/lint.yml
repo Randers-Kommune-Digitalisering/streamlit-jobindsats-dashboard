@@ -35,4 +35,4 @@ jobs:
           flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Lint with flake8
         run: | 
-          flake8 --ignore=E501,W293 src tests --show-source
+          flake8 --ignore=E501,W293,W504 src tests --show-source
