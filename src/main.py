@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 from utils.logo import get_logo
 from page.sygedagpenge import get_sygedagpenge_overview
 from page.jobindsats_overview import show_jobindsats_metadata_overview
+from page.fremtidens_randers import get_ydelsesgrupper_overview
 
 st.set_page_config(page_title="Jobindsats Dashboard", page_icon="assets/favicon.ico")
 
@@ -10,7 +11,7 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "Jobindsats Dashboard",
-        ["Sygedagpenge", "Jobindsats Overblik", "Aktiverede", "Fuldtidspersoner på offentlig forsørgelse"],
+        ["Sygedagpenge", "Jobindsats Overblik", "Aktiverede", "Fuldtidspersoner på offentlig forsørgelse", "Fremtidens Randers"],
         default_index=0,
         icons=['bi bi-hospital', 'bi bi-bar-chart-line', 'bi bi-person-check', 'bi bi-people-fill'],
         menu_icon="bi bi-briefcase",
@@ -27,3 +28,5 @@ if selected == "Sygedagpenge":
     get_sygedagpenge_overview()
 elif selected == "Jobindsats Overblik":
     show_jobindsats_metadata_overview()
+elif selected == "Fremtidens Randers":
+    get_ydelsesgrupper_overview()
