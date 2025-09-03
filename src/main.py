@@ -4,16 +4,17 @@ from utils.logo import get_logo
 from page.sygedagpenge import get_sygedagpenge_overview
 from page.jobindsats_overview import show_jobindsats_metadata_overview
 from page.fremtidens_randers import get_ydelsesgrupper_overview
+from page.ydelser import get_ydelser_overview
 
-st.set_page_config(page_title="Jobindsats Dashboard", page_icon="assets/favicon.ico")
+st.set_page_config(page_title="Jobindsats Dashboard", page_icon="assets/favicon.ico", layout="wide")
 
 with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "Jobindsats Dashboard",
-        ["Sygedagpenge", "Jobindsats Overblik", "Aktiverede", "Fuldtidspersoner på offentlig forsørgelse", "Fremtidens Randers"],
+        ["Sygedagpenge", "Jobindsats Overblik", "Fremtidens Randers", "Ydelser"],
         default_index=0,
-        icons=['bi bi-hospital', 'bi bi-bar-chart-line', 'bi bi-person-check', 'bi bi-people-fill'],
+        icons=['bi bi-hospital', 'bi bi-bar-chart-line', 'bi bi-person-check', 'bi bi-receipt'],
         menu_icon="bi bi-briefcase",
         styles={
             "container": {"padding": "5px", "background-color": "#f0f0f0"},
@@ -30,3 +31,5 @@ elif selected == "Jobindsats Overblik":
     show_jobindsats_metadata_overview()
 elif selected == "Fremtidens Randers":
     get_ydelsesgrupper_overview()
+elif selected == "Ydelser":
+    get_ydelser_overview()
