@@ -3,7 +3,7 @@ import pandas as pd
 import altair as alt
 from io import BytesIO
 from utils.database_connection import get_jobindsats_db
-from utils.jobindsats_utils import udfaldsmål_options, målgruppe_options
+from utils.jobindsats_utils import ydelsesgrupper_udfaldsmål_options, ydelsesgrupper_målgruppe_options
 import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
@@ -12,7 +12,7 @@ db_client = get_jobindsats_db()
 def get_ydelsesgrupper_overview():
 
     content_tabs = sac.tabs([
-        sac.TabsItem('Ydelsesgrupper i alt',  tag='Ydelsesgrupper i alt', icon='bar-chart'),
+        sac.TabsItem('Ydelsesgrupper i alt', tag='Ydelsesgrupper i alt', icon='bar-chart'),
         sac.TabsItem('Udvikling', tag='Udvikling', icon='line-chart'),
         sac.TabsItem('Placering', tag='Placering', icon='flag'),
     ], color='dark', size='md', position='top', align='start', use_container_width=True)
@@ -61,11 +61,11 @@ def get_ydelsesgrupper_overview():
             with col1:
                 st.subheader("Filtrering")
 
-                selected_udfaldsmål = st.selectbox("Udfaldsmål", udfaldsmål_options, index=1)
+                selected_udfaldsmål = st.selectbox("Udfaldsmål", ydelsesgrupper_udfaldsmål_options, index=1)
                 available_years = sorted(df["År"].unique())
                 selected_year = st.selectbox("År", available_years, index=len(available_years) - 1)
                 available_målgrupper = sorted(df["Ydelsesgrupper"].unique())
-                målgruppe_filtered = [m for m in målgruppe_options if m in available_målgrupper]
+                målgruppe_filtered = [m for m in ydelsesgrupper_målgruppe_options if m in available_målgrupper]
                 selected_målgruppe = st.selectbox("Målgruppe", målgruppe_filtered, index=målgruppe_filtered.index("Ydelsesgrupper i alt") if "Ydelsesgrupper i alt" in målgruppe_filtered else 0)
 
             with col2:
@@ -112,18 +112,64 @@ def get_ydelsesgrupper_overview():
                 )
 
         elif content_tabs == 'Udvikling':
-            st.info("Afventer")
+            col1, col2 = st.columns([1, 2], gap="large")
+            with col1:
+                st.subheader("Filtrering")
+                available_målgrupper = sorted(df["Ydelsesgrupper"].unique())
+                målgruppe_filtered = [m for m in ydelsesgrupper_målgruppe_options if m in available_målgrupper]
+                selected_målgruppe = st.selectbox("Målgruppe", målgruppe_filtered, index=0)
+                andel_options = ["Placering på benchmarkranglisten", "Forventet andel (pct.)", "Faktisk andel (pct.)"]
+                selected_andel = st.selectbox("Vælg andel/placering", andel_options, index=0)
+
+            with col2:
+                df_udvikling = df[
+                    (df["Ydelsesgrupper"] == selected_målgruppe) &
+                    (df["Område"] == "Randers")
+                ].copy()
+
+                df_udvikling["ÅrMåned"] = df_udvikling["Periode Ydelsesgrupper"].dt.strftime("%Y-%m")
+
+                df_udvikling["Værdi"] = pd.to_numeric(df_udvikling[selected_andel], errors="coerce")
+                chart_df = df_udvikling.dropna(subset=["ÅrMåned", "Værdi"])
+                chart_df = chart_df[["ÅrMåned", "Værdi"]]
+
+                st.header(f"{selected_andel} for {selected_målgruppe} i Randers over tid", divider="gray")
+                chart = alt.Chart(chart_df).mark_line(point=alt.OverlayMarkDef(filled=False, fill="white")).encode(
+                    x=alt.X('ÅrMåned:N', title='Periode', sort=list(chart_df["ÅrMåned"].unique())),
+                    y=alt.Y('Værdi:Q', title=selected_andel),
+                    tooltip=[
+                        alt.Tooltip('ÅrMåned:N', title='Periode'),
+                        alt.Tooltip('Værdi:Q', title=selected_andel, format='.2f')
+                    ]
+                ).properties(width=900, height=400)
+
+                st.altair_chart(chart, use_container_width=True)
+
+                export_df = chart_df.rename(columns={"Værdi": selected_andel})
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                    export_df.to_excel(writer, index=False, sheet_name='Udvikling')
+                output.seek(0)
+
+                st.download_button(
+                    label="Eksporter udviklingsdata til Excel",
+                    data=output,
+                    file_name=f"randers_udvikling_{selected_målgruppe}_{selected_andel}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    type="primary",
+                    icon=":material/add_chart:"
+                )
 
         elif content_tabs == 'Placering':
             col1, col2 = st.columns([1, 2], gap="large")
             with col1:
                 st.subheader("Filtrering")
 
-                selected_udfaldsmål = st.selectbox("Udfaldsmål", udfaldsmål_options, index=1)
+                selected_udfaldsmål = st.selectbox("Udfaldsmål", ydelsesgrupper_udfaldsmål_options, index=1)
                 available_years = sorted(df["År"].unique())
                 selected_year = st.selectbox("År", available_years, index=len(available_years) - 1)
                 available_målgrupper = sorted(df["Ydelsesgrupper"].unique())
-                målgruppe_filtered = [m for m in målgruppe_options if m in available_målgrupper]
+                målgruppe_filtered = [m for m in ydelsesgrupper_målgruppe_options if m in available_målgrupper]
                 selected_målgruppe = st.selectbox("Målgruppe", målgruppe_filtered, index=0)
 
             with col2:
@@ -162,7 +208,7 @@ def get_ydelsesgrupper_overview():
                 output.seek(0)
 
                 st.download_button(
-                    label="Eksporter data til Excel",
+                    label="Eksporter Placering data til Excel",
                     data=output,
                     file_name=f"{selected_udfaldsmål.lower().replace(' ', '_')}_kommuner_{selected_year}_{selected_målgruppe}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
