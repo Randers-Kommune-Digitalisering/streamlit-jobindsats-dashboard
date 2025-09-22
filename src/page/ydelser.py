@@ -49,7 +49,8 @@ def get_ydelser_overview():
         df = st.session_state[session_key]
 
         df[periode_col] = pd.to_datetime(df[periode_col], errors='coerce')
-        df["År"] = df[periode_col].dt.year.astype(str)
+        # df["År"] = df[periode_col].dt.year.astype(str)
+        df["År"] = df[periode_col].dt.year
         df["Måned"] = df[periode_col].dt.month
         month_map = {
             1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "Maj", 6: "Jun",
@@ -64,26 +65,29 @@ def get_ydelser_overview():
                 selected_udfaldsmål = st.selectbox("Udfaldsmål", ydelser_udfaldsmål_options, index=1)
                 available_years = sorted(df["År"].unique())
                 selected_year = st.selectbox("År", available_years, index=len(available_years) - 1)
+                st.checkbox("Inkluder seneste to år", value=False, key="include_last_two_years")
 
             with col2:
                 df_filtered = df[
                     (df["Område"] == "Randers") &
-                    (df["År"] == selected_year)
+                    (df["År"].isin([selected_year, selected_year-1, selected_year-2]) if st.session_state["include_last_two_years"] else df["År"] == selected_year)
                 ].copy()
 
                 df_filtered["Værdi"] = pd.to_numeric(df_filtered[selected_udfaldsmål], errors="coerce")
-                chart_df = df_filtered.dropna(subset=["MånedNavn", "Værdi"])
-                chart_df = chart_df[["Måned", "MånedNavn", "Værdi"]]
+                chart_df = df_filtered.dropna(subset=["MånedNavn", "Værdi", "År"])
+                chart_df = chart_df[["Måned", "MånedNavn", "Værdi", "År"]]
 
                 month_order = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
                 chart_df["MånedNavn"] = pd.Categorical(chart_df["MånedNavn"], categories=month_order, ordered=True)
 
                 st.header(f"{ydelses_name}: {selected_udfaldsmål} i Randers pr. måned - {selected_year}", divider="gray")
-                chart = alt.Chart(chart_df).mark_bar().encode(
+
+                chart = alt.Chart(chart_df).mark_line(point=True).encode(
                     x=alt.X('MånedNavn:N', title='Måned', sort=month_order),
                     y=alt.Y('Værdi:Q', title=selected_udfaldsmål),
-                    color=alt.Color('Værdi:Q', scale=alt.Scale(scheme='blues'), legend=None),
+                    color=alt.Color('År:N', title='År'),  # One line per year
                     tooltip=[
+                        alt.Tooltip('År:N', title='År'),
                         alt.Tooltip('MånedNavn:N', title='Måned'),
                         alt.Tooltip('Værdi:Q', title=selected_udfaldsmål, format='.2f')
                     ]
