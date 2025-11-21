@@ -70,7 +70,7 @@ def get_ydelser_overview():
             with col2:
                 df_filtered = df[
                     (df["Område"] == "Randers") &
-                    (df["År"].isin([selected_year, selected_year-1, selected_year-2]) if st.session_state["include_last_two_years"] else df["År"] == selected_year)
+                    (df["År"].isin([selected_year, selected_year - 1, selected_year - 2]) if st.session_state["include_last_two_years"] else df["År"] == selected_year)
                 ].copy()
 
                 df_filtered["Værdi"] = pd.to_numeric(df_filtered[selected_udfaldsmål], errors="coerce")
