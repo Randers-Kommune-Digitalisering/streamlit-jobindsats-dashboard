@@ -11,6 +11,7 @@ db_client = get_jobindsats_db()
 
 
 
+
 #depends on this function to start the page everything inside is the content
 def get_ydelsesgrupper_overview():
     
