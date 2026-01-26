@@ -11,12 +11,12 @@ def show_job_og_sundhed_graph():
         if "y14d03_data" not in st.session_state:
             with st.spinner("Indlæser jobindsats_y14d03 data..."):
                 query = (
-                        'SELECT "Område", "Periode", "Ydelsesgrupper", "Målgruppe", '
-                        '"Efterfølgende beskæftigelse: I anden virksomhed i anden branche", '
-                        '"Efterfølgende beskæftigelse: I anden virksomhed i samme branche", '
-                        '"Efterfølgende beskæftigelse: I samme virksomhed", '
-                        '"Efterfølgende beskæftigelse: Ingen beskæftigelse" '
-                        'FROM jobindsats_y14d03'
+                    'SELECT "Område", "Periode", "Ydelsesgrupper", "Målgruppe", '
+                    '"Efterfølgende beskæftigelse: I anden virksomhed i anden branche", '
+                    '"Efterfølgende beskæftigelse: I anden virksomhed i samme branche", '
+                    '"Efterfølgende beskæftigelse: I samme virksomhed", '
+                    '"Efterfølgende beskæftigelse: Ingen beskæftigelse" '
+                    'FROM jobindsats_y14d03'
                     )
 
                 columns = [
@@ -28,7 +28,7 @@ def show_job_og_sundhed_graph():
                     "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
                     "Efterfølgende beskæftigelse: I samme virksomhed",
                     "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-                        ]
+                    ]
 
                 result = db_client.execute_sql(query)
 
@@ -46,7 +46,7 @@ def show_job_og_sundhed_graph():
             "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
             "Efterfølgende beskæftigelse: I samme virksomhed",
             "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-        ]
+            ]
 
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -68,7 +68,7 @@ def show_job_og_sundhed_graph():
             "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
             "Efterfølgende beskæftigelse: I samme virksomhed",
             "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-        ]
+            ]
 
         selected_outcome = st.selectbox("Vælg outcome", outcome_options)
 

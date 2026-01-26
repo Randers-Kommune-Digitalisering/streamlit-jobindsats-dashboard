@@ -7,9 +7,6 @@ import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
 
-
-
-
 #depends on this function to start the page everything inside is the content
 def get_ydelsesgrupper_overview():
     
@@ -71,23 +68,17 @@ def get_ydelsesgrupper_overview():
                 målgruppe_filtered = [m for m in ydelsesgrupper_målgruppe_options if m in available_målgrupper]
                 selected_målgruppe = st.selectbox("Målgruppe", målgruppe_filtered, index=målgruppe_filtered.index("Ydelsesgrupper i alt") if "Ydelsesgrupper i alt" in målgruppe_filtered else 0)
 
-
-
             with col2:
                 df_filtered = df[
                     (df["Ydelsesgrupper"] == selected_målgruppe) &
                     (df["Område"] == "Randers") &
                     (df["År"] == selected_year)
                 ].copy()
-
-
- 
                 df_filtered["Værdi"] = pd.to_numeric(df_filtered[selected_udfaldsmål], errors="coerce")
                 chart_df = df_filtered.dropna(subset=["MånedNavn", "Værdi"])
                 chart_df = chart_df[["Måned", "MånedNavn", "Værdi"]]
 
-
-#initialize a month order list
+# initialize a month order list
                 month_order = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
 
 # ensure that all montts even even those without data is represented
@@ -111,18 +102,12 @@ def get_ydelsesgrupper_overview():
                     empty=False
                 )
                 
-
-
-#the headrer just above the chart
+# the header just above the chart
                 st.header(
                     f"{selected_udfaldsmål} for {selected_målgruppe} i Randers pr. måned - {selected_year}",
                     divider="blue"
                 )
-
-
-
-
-#sets attributes for the x and y axis
+# sets attributes for the x and y axis
                 base = alt.Chart(chart_df).encode(
                     x=alt.X(
                         "MånedNavn:N",
@@ -138,9 +123,6 @@ def get_ydelsesgrupper_overview():
                     ),
                 )
 
-
-
-
                 bars = base.mark_bar(
                     cornerRadiusTopLeft=5,
                     cornerRadiusTopRight=5
@@ -151,9 +133,7 @@ def get_ydelsesgrupper_overview():
                         alt.value("#A9C7E8") 
                     )
                 ).add_params(hover)
-
-
-#all the configurations for the chart such as color and size
+# all the configurations for the chart such as color and size
                 chart = (bars).properties(
                     height=500
                 ).configure_axis(
@@ -162,7 +142,7 @@ def get_ydelsesgrupper_overview():
                     fill="#160000"
                 )
 
-#ensures that the chat fills the entire container width to make it dynamic
+# ensures that the chat fills the entire container width to make it dynamic
                 st.altair_chart(chart, use_container_width=True)
 
 
