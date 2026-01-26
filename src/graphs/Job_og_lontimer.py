@@ -1,9 +1,5 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 from utils.database_connection import get_jobindsats_db
-
-
 
 db_client = get_jobindsats_db()
 def show_job_og_lontimer_graph():
