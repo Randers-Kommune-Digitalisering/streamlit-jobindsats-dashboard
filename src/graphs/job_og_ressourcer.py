@@ -18,7 +18,7 @@ def show_job_og_ressourcer_graph():
                 '"Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", '
                 '"Fuldtidspersoner i pct. af befolkningen 16-66 år" '
                 'FROM jobindsats_y07a02'
-                    )
+                )
 
                 columns = [
                 "Område",
@@ -27,7 +27,7 @@ def show_job_og_ressourcer_graph():
                 "Antal fuldtidspersoner",
                 "Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år",
                 "Fuldtidspersoner i pct. af befolkningen 16-66 år"
-                    ]
+                ]
 
                 result = db_client.execute_sql(query)
 

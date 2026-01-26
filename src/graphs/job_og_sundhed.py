@@ -51,7 +51,6 @@ def show_job_og_sundhed_graph():
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-
         df_randers = df[df["Område"] == "Randers"].copy()
 
         if df_randers.empty:
@@ -81,7 +80,7 @@ def show_job_og_sundhed_graph():
         available_years = sorted(df_plot_base["År"].dropna().unique())
 
 # latest year cuss we go index list -1
-        selected_year = available_years[-1]   
+        selected_year = available_years[-1]
 
         years_to_show = [selected_year]
         if include_last_2_years:
@@ -125,10 +124,8 @@ def show_job_og_sundhed_graph():
         }
 
         st.plotly_chart(fig, use_container_width=True, config=config)
-
-
         
-#second graph
+# second graph
 
         df_plot = df_randers[df_randers["Ydelsesgrupper"] == selected_ydelsesgruppe].copy()
 
@@ -137,7 +134,6 @@ def show_job_og_sundhed_graph():
             .groupby("Periode", as_index=False)[selected_outcome]
             .mean()
         )
-
 
         fig = px.line(
             df_plot,

@@ -7,7 +7,8 @@ import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
 
-#depends on this function to start the page everything inside is the content
+
+# depends on this function to start the page everything inside is the content
 def get_ydelsesgrupper_overview():
     
     content_tabs = sac.tabs([
@@ -43,7 +44,6 @@ def get_ydelsesgrupper_overview():
                 else:
                     st.error("Kunne ikke hente data fra databasen.")
                     return
-
 
         df = st.session_state.ydelsesgrupper_data
 
@@ -129,8 +129,8 @@ def get_ydelsesgrupper_overview():
                 ).encode(
                     color=alt.condition(
                         hover,
-                        alt.value("#1f77b4"), 
-                        alt.value("#A9C7E8") 
+                        alt.value("#1f77b4"),
+                        alt.value("#A9C7E8")
                     )
                 ).add_params(hover)
 # all the configurations for the chart such as color and size
@@ -145,15 +145,12 @@ def get_ydelsesgrupper_overview():
 # ensures that the chat fills the entire container width to make it dynamic
                 st.altair_chart(chart, use_container_width=True)
 
-
 #           export_df = chart_df.copy()
 #           export_df = export_df.rename(columns={"Værdi": selected_udfaldsmål})
 #           output = BytesIO()
 #           with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
 #               export_df.to_excel(writer, index=False, sheet_name='Randers')
-#           output.seek(0) 
-
-
+#           output.seek(0)
 
 #           st.download_button(
 #               label="Eksporter Ydelsesgruppe data til Excel",
@@ -174,7 +171,6 @@ def get_ydelsesgrupper_overview():
                 andel_options = ["Placering på benchmarkranglisten", "Forventet andel (pct.)", "Faktisk andel (pct.)"]
                 selected_andel = st.selectbox("Vælg andel/placering", andel_options, index=0)
 
-
             with col2:
                 df_udvikling = df[
                     (df["Ydelsesgrupper"] == selected_målgruppe) &
@@ -186,8 +182,6 @@ def get_ydelsesgrupper_overview():
                 df_udvikling["Værdi"] = pd.to_numeric(df_udvikling[selected_andel], errors="coerce")
                 chart_df = df_udvikling.dropna(subset=["ÅrMåned", "Værdi"])
                 chart_df = chart_df[["ÅrMåned", "Værdi"]]
-
-    
 
                 st.header(f"{selected_andel} for {selected_målgruppe} i Randers over tid", divider="gray")
 
@@ -202,14 +196,11 @@ def get_ydelsesgrupper_overview():
 
                 st.altair_chart(chart, use_container_width=True)
 
-
-
 #                export_df = chart_df.rename(columns={"Værdi": selected_andel})
 #                output = BytesIO()
 #                with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
 #                    export_df.to_excel(writer, index=False, sheet_name='Udvikling')
 #                output.seek(0)
-
 #                st.download_button(
 #                    label="Eksporter udviklingsdata til Excel",
 #                    data=output,
@@ -219,15 +210,10 @@ def get_ydelsesgrupper_overview():
 #                    icon=":material/add_chart:"
 #                )
 
-
-
-
         elif content_tabs == 'Placering':
             col1, col2 = st.columns([1, 2], gap="large")
             with col1:
                 st.subheader("Filtrering")
-
-
 
                 selected_udfaldsmål = st.selectbox("Udfaldsmål", ydelsesgrupper_udfaldsmål_options, index=1)
                 available_years = sorted(df["År"].unique())
@@ -236,13 +222,11 @@ def get_ydelsesgrupper_overview():
                 målgruppe_filtered = [m for m in ydelsesgrupper_målgruppe_options if m in available_målgrupper]
                 selected_målgruppe = st.selectbox("Målgruppe", målgruppe_filtered, index=0)
 
-
             with col2:
                 df_placering = df[
                     (df["År"] == selected_year) &
                     (df["Ydelsesgrupper"] == selected_målgruppe)
                 ].copy()
-
 
                 df_placering["Værdi"] = pd.to_numeric(df_placering[selected_udfaldsmål], errors="coerce")
                 df_placering = df_placering.dropna(subset=["Område", "Værdi", "Periode Ydelsesgrupper"])
