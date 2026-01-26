@@ -1,12 +1,7 @@
 import streamlit as st
-import requests
 import pandas as pd
-import altair as alt
-from io import BytesIO
 import plotly.express as px
-from streamlit_option_menu import option_menu
 from utils.database_connection import get_jobindsats_db
-import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
 
@@ -46,7 +41,6 @@ def show_job_og_sundhed_graph():
                 
 
 
-                #second graph
 
         df = st.session_state.y14d03_data
 
@@ -134,6 +128,10 @@ def show_job_og_sundhed_graph():
         }
 
         st.plotly_chart(fig, use_container_width=True, config=config)
+
+
+        
+        #second graph
 
         df_plot = df_randers[df_randers["Ydelsesgrupper"] == selected_ydelsesgruppe].copy()
 

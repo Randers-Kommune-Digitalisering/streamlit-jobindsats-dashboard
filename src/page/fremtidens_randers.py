@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import numpy as np
-from io import BytesIO
 from utils.database_connection import get_jobindsats_db
 from utils.jobindsats_utils import ydelsesgrupper_udfaldsmål_options, ydelsesgrupper_målgruppe_options
 import streamlit_antd_components as sac

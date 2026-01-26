@@ -1,9 +1,4 @@
 import streamlit as st
-import requests
-import pandas as pd
-import altair as alt
-from io import BytesIO
-import plotly.express as px
 from streamlit_option_menu import option_menu
 from utils.database_connection import get_jobindsats_db
 from graphs.job_og_ressourcer import show_job_og_ressourcer_graph
