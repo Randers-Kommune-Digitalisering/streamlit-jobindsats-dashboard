@@ -33,7 +33,6 @@ def get_jobcenter_randers_overview():
             color='#4a4a4a'
         )
 
-
     st.title("Jobcenter Randers")
     if afdeling is None:
         st.subheader("Vælg en afdeling i venstre side")
@@ -41,13 +40,15 @@ def get_jobcenter_randers_overview():
         st.subheader(afdeling)
         if afdeling == "Job og ressourcer":
             show_job_og_ressourcer_graph()
-            
+
 
         elif afdeling == "UUR":
             show_UUR_graph()
 
+
         elif afdeling == "Job og løntimer":
             show_job_og_lontimer_graph()
+
 
         elif afdeling == "Job og sundhedd":
             show_job_og_sundhed_graph()

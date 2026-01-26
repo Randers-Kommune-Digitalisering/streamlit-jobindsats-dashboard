@@ -20,15 +20,15 @@ def show_job_og_sundhed_graph():
                     )
 
                 columns = [
-                        "Område",
-                        "Periode",
-                        "Ydelsesgrupper",
-                        "Målgruppe",
-                        "Efterfølgende beskæftigelse: I anden virksomhed i anden branche",
-                        "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
-                        "Efterfølgende beskæftigelse: I samme virksomhed",
-                        "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-                    ]
+                    "Område",
+                    "Periode",
+                    "Ydelsesgrupper",
+                    "Målgruppe",
+                    "Efterfølgende beskæftigelse: I anden virksomhed i anden branche",
+                    "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
+                    "Efterfølgende beskæftigelse: I samme virksomhed",
+                    "Efterfølgende beskæftigelse: Ingen beskæftigelse",
+                        ]
 
                 result = db_client.execute_sql(query)
 
@@ -38,7 +38,6 @@ def show_job_og_sundhed_graph():
                 else:
                     st.error("Kunne ikke hente jobindsats_y14d03 data fra databasen.")
                     return
-                
 
         df = st.session_state.y14d03_data
 
