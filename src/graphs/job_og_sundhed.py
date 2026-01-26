@@ -17,7 +17,7 @@ def show_job_og_sundhed_graph():
                     '"Efterfølgende beskæftigelse: I samme virksomhed", '
                     '"Efterfølgende beskæftigelse: Ingen beskæftigelse" '
                     'FROM jobindsats_y14d03'
-                    )
+                )
 
                 columns = [
                     "Område",
@@ -28,7 +28,7 @@ def show_job_og_sundhed_graph():
                     "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
                     "Efterfølgende beskæftigelse: I samme virksomhed",
                     "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-                    ]
+                ]
 
                 result = db_client.execute_sql(query)
 
@@ -46,7 +46,7 @@ def show_job_og_sundhed_graph():
             "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
             "Efterfølgende beskæftigelse: I samme virksomhed",
             "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-            ]
+        ]
 
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -67,7 +67,7 @@ def show_job_og_sundhed_graph():
             "Efterfølgende beskæftigelse: I anden virksomhed i samme branche",
             "Efterfølgende beskæftigelse: I samme virksomhed",
             "Efterfølgende beskæftigelse: Ingen beskæftigelse",
-            ]
+        ]
 
         selected_outcome = st.selectbox("Vælg outcome", outcome_options)
 
@@ -87,7 +87,7 @@ def show_job_og_sundhed_graph():
             try:
                 y = int(selected_year)
                 years_to_show = [str(y - 2), str(y - 1), str(y)]
-            except:
+            except Exception:
                 years_to_show = [selected_year]
 
         df_plot = df_plot_base[df_plot_base["År"].isin(years_to_show)].copy()

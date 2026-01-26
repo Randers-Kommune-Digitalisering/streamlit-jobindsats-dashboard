@@ -7,7 +7,7 @@ from utils.database_connection import get_jobindsats_db
 db_client = get_jobindsats_db()
 
 
-def show_job_og_ressourcer_graph():   
+def show_job_og_ressourcer_graph():
     try:
         if "y07a02_data" not in st.session_state:
             with st.spinner("Indlæser jobindsats_y07a02 data..."):
