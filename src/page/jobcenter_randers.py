@@ -34,8 +34,6 @@ def get_jobcenter_randers_overview():
         )
 
 
-
-
     st.title("Jobcenter Randers")
     if afdeling is None:
         st.subheader("Vælg en afdeling i venstre side")

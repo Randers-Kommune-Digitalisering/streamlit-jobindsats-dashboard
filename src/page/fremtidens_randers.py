@@ -87,24 +87,24 @@ def get_ydelsesgrupper_overview():
                 chart_df = chart_df[["Måned", "MånedNavn", "Værdi"]]
 
 
-                #initialize a month order list
+#initialize a month order list
                 month_order = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"]
 
-                # ensure that all montts even even those without data is represented
+# ensure that all montts even even those without data is represented
                 months_full = pd.DataFrame({
                     "MånedNavn": month_order,
                     "Måned": list(range(1, 13))
                 })
 
-                # combines (merge) the chart list with the months list (months_full) is always the 12 months (these 2 lines are what always shows all months)
+# combines (merge) the chart list with the months list (months_full) is always the 12 months (these 2 lines are what always shows all months)
                 chart_df = months_full.merge(chart_df, on=["Måned", "MånedNavn"], how="left")
 
-                # this detects if udfaldsmål is a percentage column so it can adjust the formating (can be used in many scenarioes)
+# this detects if udfaldsmål is a percentage column so it can adjust the formating (can be used in many scenarioes)
                 is_pct = "pct" in selected_udfaldsmål.lower()
                 value_format = ".1f" if is_pct else ",.0f"
 
 
-                # a small reusable hover function to highlight the hovered over bar
+# a small reusable hover function to highlight the hovered over bar
                 hover = alt.selection_point(
                     fields=["MånedNavn"],
                     on="mouseover",
@@ -113,7 +113,7 @@ def get_ydelsesgrupper_overview():
                 
 
 
-                #the headrer just above the chart
+#the headrer just above the chart
                 st.header(
                     f"{selected_udfaldsmål} for {selected_målgruppe} i Randers pr. måned - {selected_year}",
                     divider="blue"
@@ -122,7 +122,7 @@ def get_ydelsesgrupper_overview():
 
 
 
-                #sets attributes for the x and y axis
+#sets attributes for the x and y axis
                 base = alt.Chart(chart_df).encode(
                     x=alt.X(
                         "MånedNavn:N",
@@ -147,13 +147,13 @@ def get_ydelsesgrupper_overview():
                 ).encode(
                     color=alt.condition(
                         hover,
-                        alt.value("#1f77b4"),   # hover highlight
-                        alt.value("#A9C7E8")    # default calm color
+                        alt.value("#1f77b4"), 
+                        alt.value("#A9C7E8") 
                     )
                 ).add_params(hover)
 
 
-                #all the configurations for the chart such as color and size
+#all the configurations for the chart such as color and size
                 chart = (bars).properties(
                     height=500
                 ).configure_axis(
@@ -162,32 +162,27 @@ def get_ydelsesgrupper_overview():
                     fill="#160000"
                 )
 
-                #ensures that the chat fills the entire container width to make it dynamic
+#ensures that the chat fills the entire container width to make it dynamic
                 st.altair_chart(chart, use_container_width=True)
 
 
+#           export_df = chart_df.copy()
+#           export_df = export_df.rename(columns={"Værdi": selected_udfaldsmål})
+#           output = BytesIO()
+#           with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+#               export_df.to_excel(writer, index=False, sheet_name='Randers')
+#           output.seek(0) 
 
 
 
-     #           export_df = chart_df.copy()
-     #           export_df = export_df.rename(columns={"Værdi": selected_udfaldsmål})
-     #           output = BytesIO()
-     #           with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-     #               export_df.to_excel(writer, index=False, sheet_name='Randers')
-     #           output.seek(0)
-
-
-
-
-     #           st.download_button(
-     #               label="Eksporter Ydelsesgruppe data til Excel",
-     #               data=output,
-     #               file_name=f"randers_ydelsesgrupper_{selected_year}_{selected_målgruppe}_{selected_udfaldsmål}.xlsx",
-     #               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-     #               type="primary",
-     #               icon=":material/add_chart:"
-     #           )
-
+#           st.download_button(
+#               label="Eksporter Ydelsesgruppe data til Excel",
+#               data=output,
+#               file_name=f"randers_ydelsesgrupper_{selected_year}_{selected_målgruppe}_{selected_udfaldsmål}.xlsx",
+#               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+#               type="primary",
+#               icon=":material/add_chart:"
+#           )
 
         elif content_tabs == 'Udvikling':
             col1, col2 = st.columns([1, 2], gap="large")
@@ -290,8 +285,6 @@ def get_ydelsesgrupper_overview():
                 ).properties(width=900, height=500)
 
                 st.altair_chart(chart, use_container_width=True)
-
-
 
 #                export_df = df_placering[["Område", "Værdi"]].copy()
 #                export_df = export_df.rename(columns={"Værdi": selected_udfaldsmål})

@@ -40,7 +40,7 @@ def show_job_og_ressourcer_graph():
 
         df = st.session_state.y07a02_data
 
-        # Convert numeric columns
+# Convert numeric columns
         numeric_cols = [
             "Antal personer",
             "Antal fuldtidspersoner",
@@ -50,14 +50,14 @@ def show_job_og_ressourcer_graph():
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        # Filter for Randers
+# Filter for Randers
         df_randers = df[df["Område"] == "Randers"].copy()
 
         if df_randers.empty:
             st.warning("Ingen data fundet for Randers.")
             return
 
-        # Sort by period
+# Sort by period
         df_randers = df_randers.sort_values("Periode")
 
         st.subheader("Sygedagpenge Randers ")

@@ -40,8 +40,6 @@ def show_job_og_sundhed_graph():
                     return
                 
 
-
-
         df = st.session_state.y14d03_data
 
         numeric_cols = [
@@ -79,11 +77,11 @@ def show_job_og_sundhed_graph():
 
         df_plot_base = df_randers[df_randers["Ydelsesgrupper"] == selected_ydelsesgruppe].copy()
 
-         # Extract year from Periode like "2024QMAT03"
+# Extract year from Periode like "2024QMAT03"
         df_plot_base["År"] = df_plot_base["Periode"].astype(str).str[:4]
         available_years = sorted(df_plot_base["År"].dropna().unique())
 
-        # latest year cuss we go index list -1
+# latest year cuss we go index list -1
         selected_year = available_years[-1]   
 
         years_to_show = [selected_year]
@@ -96,7 +94,7 @@ def show_job_og_sundhed_graph():
 
         df_plot = df_plot_base[df_plot_base["År"].isin(years_to_show)].copy()
 
-        # Aggregate so we get 1 value per period (removes the weird vertical jumps)
+# Aggregate so we get 1 value per period (removes the weird vertical jumps)
         df_plot = (
             df_plot.groupby(["År", "Periode"], as_index=False)[selected_outcome]
             .mean()
@@ -131,7 +129,7 @@ def show_job_og_sundhed_graph():
 
 
         
-        #second graph
+#second graph
 
         df_plot = df_randers[df_randers["Ydelsesgrupper"] == selected_ydelsesgruppe].copy()
 
