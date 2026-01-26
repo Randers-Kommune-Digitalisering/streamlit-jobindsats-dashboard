@@ -242,7 +242,18 @@ def get_jobcenter_randers_overview():
                     yaxis_title=selected_outcome
                 )
 
-                st.plotly_chart(fig, use_container_width=True)
+                config = {
+                    "displaylogo": False,
+                    "toImageButtonOptions": {
+                        "format": "png",
+                        "filename": "jobindsats_graf",
+                        "height": 600,
+                        "width": 1200,
+                        "scale": 2
+                    }
+                }
+
+                st.plotly_chart(fig, use_container_width=True, config=config)
 
                 
                 df_plot = df_randers[df_randers["Ydelsesgrupper"] == selected_ydelsesgruppe].copy()
