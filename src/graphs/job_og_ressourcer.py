@@ -13,20 +13,20 @@ def show_job_og_ressourcer_graph():
             with st.spinner("Indlæser jobindsats_y07a02 data..."):
 
                 query = (
-                'SELECT "Område", "Periode", '
-                '"Antal personer", "Antal fuldtidspersoner", '
-                '"Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", '
-                '"Fuldtidspersoner i pct. af befolkningen 16-66 år" '
-                'FROM jobindsats_y07a02'
+                    'SELECT "Område", "Periode", '
+                    '"Antal personer", "Antal fuldtidspersoner", '
+                    '"Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", '
+                    '"Fuldtidspersoner i pct. af befolkningen 16-66 år" '
+                    'FROM jobindsats_y07a02'
                 )
 
                 columns = [
-                "Område",
-                "Periode",
-                "Antal personer",
-                "Antal fuldtidspersoner",
-                "Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år",
-                "Fuldtidspersoner i pct. af befolkningen 16-66 år"
+                    "Område",
+                    "Periode",
+                    "Antal personer",
+                    "Antal fuldtidspersoner",
+                    "Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år",
+                    "Fuldtidspersoner i pct. af befolkningen 16-66 år"
                 ]
 
                 result = db_client.execute_sql(query)
