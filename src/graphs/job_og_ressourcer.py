@@ -2,9 +2,30 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from utils.database_connection import get_jobindsats_db
+import os 
 
 
 db_client = get_jobindsats_db()
+
+
+
+@st.cache_data
+def load_baseline_from_excel(excel_path: str) -> pd.DataFrame:
+    dfb = pd.read_excel(excel_path,)
+
+    # normalize column names (so Metric/Baseline also works)
+    dfb.columns = [c.strip().lower() for c in dfb.columns]
+
+    # expected columns after lowercase: metric, baseline_value
+    # but if your excel uses "baseline" instead of "baseline_value", map it
+    if "baseline_value" not in dfb.columns and "baseline" in dfb.columns:
+        dfb = dfb.rename(columns={"baseline": "baseline_value"})
+
+    dfb["metric"] = dfb["metric"].astype(str).str.strip()
+    dfb["baseline_value"] = pd.to_numeric(dfb["baseline_value"], errors="coerce")
+
+    return dfb
+
 
 
 def show_job_og_ressourcer_graph():
@@ -40,6 +61,8 @@ def show_job_og_ressourcer_graph():
 
         df = st.session_state.y07a02_data
 
+        
+
 # Convert numeric columns
         numeric_cols = [
             "Antal personer",
@@ -57,7 +80,6 @@ def show_job_og_ressourcer_graph():
             st.warning("Ingen data fundet for Randers.")
             return
 
-# Sort by period
         df_randers = df_randers.sort_values("Periode")
 
         st.subheader("Sygedagpenge Randers ")
@@ -70,6 +92,22 @@ def show_job_og_ressourcer_graph():
         ]
 
         selected_metric = st.selectbox("Vælg måling", metric_options)
+
+        # ✅ Baseline UI
+        show_excel_baseline = st.checkbox("Vis baseline fra Excel", value=True)
+        show_auto_baseline = st.checkbox("Vis auto-baseline (gennemsnit)", value=False)
+        show_percentile_baseline = st.checkbox("Vis percentile baseline", value=False)
+
+        percentile_value = None
+        baseline_percentile = None
+
+        if show_percentile_baseline:
+            percentile_value = st.slider("Vælg percentile", 1, 99, 50)
+
+            baseline_percentile = float(
+                df_randers[selected_metric].dropna().quantile(percentile_value / 100)
+            )
+        
 
         fig = px.line(
             df_randers,
@@ -84,8 +122,54 @@ def show_job_og_ressourcer_graph():
             yaxis_title=selected_metric
         )
 
+        # ✅ Add baseline lines
+        # ✅ Add baseline lines
+
+        # 1) Excel baseline (default ON)
+        if show_excel_baseline:
+            excel_path = os.path.join(os.path.dirname(__file__), "..", "assets", "excelDocs", "baseline.xlsx")
+            excel_path = os.path.normpath(excel_path)
+
+            try:
+                baseline_df = load_baseline_from_excel(excel_path)
+
+                match = baseline_df[
+                baseline_df["metric"].str.strip().str.lower() == selected_metric.strip().lower()
+                ]
+                if match.empty or pd.isna(match["baseline_value"].iloc[0]):
+                    st.warning(f"Ingen Excel-baseline fundet for: {selected_metric}")
+                else:
+                    excel_baseline_value = float(match["baseline_value"].iloc[0])
+                    fig.add_hline(
+                        y=excel_baseline_value,
+                        line_dash="dash",
+                        annotation_text=f"Baseline (Excel): {excel_baseline_value:.2f}",
+                        annotation_position="top left"
+                    )
+            except Exception as e:
+                st.warning(f"Kunne ikke læse Excel baseline: {e}")
+
+        # 2) Mean baseline
+        if show_auto_baseline:
+            mean_value = float(df_randers[selected_metric].dropna().mean())
+            fig.add_hline(
+                y=mean_value,
+                line_dash="dash",
+                annotation_text=f"Gennemsnit: {mean_value:.2f}",
+                annotation_position="top left"
+            )
+
+        # 3) Percentile baseline
+        if baseline_percentile is not None:
+            fig.add_hline(
+                y=baseline_percentile,
+                line_dash="dot",
+                annotation_text=f"{percentile_value}%-percentile: {baseline_percentile:.2f}",
+                annotation_position="bottom left"
+            )
+
         st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
-        st.error(f"Fejl: {e}")
+        st.exception(e)
         return
