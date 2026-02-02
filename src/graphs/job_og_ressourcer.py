@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from utils.database_connection import get_jobindsats_db
-import os 
+import os
 
 
 db_client = get_jobindsats_db()
+
 
 @st.cache_data
 def load_baseline_from_excel(excel_path: str) -> pd.DataFrame:
@@ -23,6 +24,7 @@ def load_baseline_from_excel(excel_path: str) -> pd.DataFrame:
     dfb["baseline_value"] = pd.to_numeric(dfb["baseline_value"], errors="coerce")
 
     return dfb
+
 
 def show_job_og_ressourcer_graph():
     try:
