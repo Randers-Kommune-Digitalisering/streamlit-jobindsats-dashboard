@@ -7,8 +7,6 @@ import os
 
 db_client = get_jobindsats_db()
 
-
-
 @st.cache_data
 def load_baseline_from_excel(excel_path: str) -> pd.DataFrame:
     dfb = pd.read_excel(excel_path,)
@@ -25,8 +23,6 @@ def load_baseline_from_excel(excel_path: str) -> pd.DataFrame:
     dfb["baseline_value"] = pd.to_numeric(dfb["baseline_value"], errors="coerce")
 
     return dfb
-
-
 
 def show_job_og_ressourcer_graph():
     try:
@@ -60,8 +56,6 @@ def show_job_og_ressourcer_graph():
                     return
 
         df = st.session_state.y07a02_data
-
-        
 
 # Convert numeric columns
         numeric_cols = [
@@ -107,7 +101,6 @@ def show_job_og_ressourcer_graph():
             baseline_percentile = float(
                 df_randers[selected_metric].dropna().quantile(percentile_value / 100)
             )
-        
 
         fig = px.line(
             df_randers,
@@ -134,7 +127,7 @@ def show_job_og_ressourcer_graph():
                 baseline_df = load_baseline_from_excel(excel_path)
 
                 match = baseline_df[
-                baseline_df["metric"].str.strip().str.lower() == selected_metric.strip().lower()
+                    baseline_df["metric"].str.strip().str.lower() == selected_metric.strip().lower()
                 ]
                 if match.empty or pd.isna(match["baseline_value"].iloc[0]):
                     st.warning(f"Ingen Excel-baseline fundet for: {selected_metric}")
