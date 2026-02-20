@@ -117,9 +117,6 @@ def show_job_og_ressourcer_graph():
             yaxis_title=selected_metric
         )
 
-        # ✅ Add baseline lines
-        # ✅ Add baseline lines
-
         # 1) Excel baseline (default ON)
         if show_excel_baseline:
             excel_path = os.path.join(os.path.dirname(__file__), "..", "assets", "excelDocs", "baseline.xlsx")
@@ -164,6 +161,92 @@ def show_job_og_ressourcer_graph():
             )
 
         st.plotly_chart(fig, use_container_width=True)
+        if "qtij01_data" not in st.session_state:
+            with st.spinner("Indlæser jobindsats_qtij01 data..."):
+                query=(
+                    'SELECT "Område", "Ydelsesgrupper", "Periode", "Målgruppe",'
+                    ' "Antal personer i alt", "antal personer med ordinære timer", '
+                    '"Andel personer med ordinære timer." '
+                    "Gennemsnitlig timetal pr person med ordinære timer '"
+                    "Gennemsnitlig antal ordinære timer  pr. måned"
+                    'FROM jobindsats_qtij01'
+                )
+                columns =[
+                    "Område",
+                    "Ydelsesgrupper",
+                    "Periode",
+                    "Målgruppe",
+                    "Antal personer i alt",
+                    "antal personer med ordinære timer",
+                    "Andel personer med ordinære timer.",
+                    "gennemsnitlig atimetalpr perso med ordinære ",
+                    "gennemsnitlig antal ordinære timer  pr. måned"
+                ]
+                
+                result = db_client.execute_sql(query)
+
+                if result is not None:
+                    df = pd.DataFrame(result, columns=columns)
+                    st.session_state.qtij01_data = df
+                else:
+                    st.error("Kunne ikke hente data fra databasen.")
+                    return
+                
+        df = st.session_state.qtij01_data
+        
+        numeric_cols = [
+            "Antal personer i alt",
+            "antal personer med ordinære timer",
+            "Andel personer med ordinære timer.",
+            "gennemsnitlig atimetalpr perso med ordinære ",
+            "gennemsnitlig antal ordinære timer  pr. måned"
+        ]
+        for col in numeric_cols:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+            
+
+#filter for Randers
+        df_randers = df[df["Område"] == "Randers"].copy()
+
+        if df_randers.empty:
+            st.warning("Ingen data fundet for Randers.")
+            return
+        
+        df_randers = df_randers.sort_values("Periode")
+
+        st.subheader("Ordinære timer – Randers ")
+
+        metric_options = [
+            "Antal personer i alt",
+            "antal personer med ordinære timer",
+            "Andel personer med ordinære timer.",
+            "gennemsnitlig atimetalpr perso med ordinære ",
+            "gennemsnitlig antal ordinære timer  pr. måned"
+        ]
+
+        selected_metric = st.selectbox("Vælg måling", metric_options)
+
+        show_auto_baseline = st.checkbox("Vis auto-baseline (gennemsnit)", value=True)
+        show_percentile_baseline = st.checkbox("Vis percentile baseline", value=False)
+
+        percentile_value = None
+        baseline_percentile = None
+
+        if show_percentile_baseline:
+            percentile_value = st.slider("Vælg percentile", 1, 99, 50)
+
+            baseline_percentile = float(
+                df_randers[selected_metric].dropna().quantile(percentile_value / 100)
+            )
+
+        fig = px.line(
+            df_randers,
+            x="Periode",
+            y=selected_metric,
+            markers=True,
+            title=f"{selected_metric} – Randers"
+        )
+
 
     except Exception as e:
         st.exception(e)
