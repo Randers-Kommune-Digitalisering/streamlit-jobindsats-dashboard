@@ -39,3 +39,5 @@ with db_tab:
     st.markdown(computer_df.drop(columns=['ComputerName', 'UpdateTimeStamp']).to_html(index=False), unsafe_allow_html=True)
 
 ```
+
+to get the uur page working you need to run the api in the input project

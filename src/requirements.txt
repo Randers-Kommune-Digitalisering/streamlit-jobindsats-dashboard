@@ -17,3 +17,5 @@ streamlit-antd-components
 pymysql
 streamlit_shadcn_ui
 xlsxwriter
+requests
+plotly
