@@ -54,7 +54,15 @@ def show_UUR_graph():
     if show_last:
         selected_years = years_to_show
 
-    # 3) Plot budget + target for one or multiple years
+    # 3) Plot budget + target for one or multiple years (overlay by month)
+    month_names = {
+        1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
+        5: "Maj", 6: "Jun", 7: "Jul", 8: "Aug",
+        9: "Sep", 10: "Okt", 11: "Nov", 12: "Dec",
+    }
+    month_order = list(range(1, 13))
+    x_months = [month_names[m] for m in month_order]
+
     fig = go.Figure()
     fig.update_layout(
         title=f"Budget per måned — {series_name} ({', '.join(map(str, selected_years))})"
@@ -65,15 +73,28 @@ def show_UUR_graph():
         budget = data["budget"]   # [{month, value}, ...]
         target = data["target"]   # float or None
 
-        # Plot budget
-        if budget:
-            xs = [f"{y}-{int(p['month']):02d}" for p in budget]
-            ys = [float(p["value"]) for p in budget]
-            fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines+markers", name=f"Budget {y}"))
-        else:
-            st.info(f"Ingen budget for {y} (viser kun target hvis den findes).")
+        # month -> value (sparse is fine)
+        month_to_value = {int(p["month"]): float(p["value"]) for p in budget}
 
-        # Plot target (optional)
+        # align values to Jan..Dec (None = missing month)
+        y_values = [month_to_value.get(m, None) for m in month_order]
+
+        # Budget line for that year
+        if any(v is not None for v in y_values):
+            fig.add_trace(go.Scatter(
+                x=x_months,
+                y=y_values,
+                mode="lines+markers",
+                name=str(y)   # legend shows just the year
+            ))
+        else:
+            st.info(f"Ingen budget for {y}.")
+
+    # Optional: only show target line when viewing a single year (avoids clutter)
+    if len(selected_years) == 1:
+        y = selected_years[0]
+        data = get_series_year(series_id, int(y))
+        target = data["target"]
         if target is not None:
             fig.add_hline(
                 y=float(target),
