@@ -19,3 +19,7 @@ streamlit_shadcn_ui
 xlsxwriter
 requests
 plotly
+fastapi
+uvicorn[standard]
+pydantic
+psycopg2-binary

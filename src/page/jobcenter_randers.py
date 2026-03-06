@@ -4,6 +4,7 @@ from graphs.job_og_ressourcer import show_job_og_ressourcer_graph
 from graphs.job_og_sundhed import show_job_og_sundhed_graph
 from graphs.UUR import show_UUR_graph
 from graphs.Job_og_lontimer import show_job_og_lontimer_graph
+from graphs.test import show_test_graph
 import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
@@ -19,7 +20,8 @@ def get_jobcenter_randers_overview():
                     sac.TreeItem("Job og løntimer"),
                     sac.TreeItem("Job og ressourcer"),
                     sac.TreeItem("Job og sundhedd"),
-                    sac.TreeItem("UUR")
+                    sac.TreeItem("UUR"),
+                    sac.TreeItem("test")
                 ]),
                 sac.TreeItem("Center for Job og Kompetencer")
             ],
@@ -48,3 +50,6 @@ def get_jobcenter_randers_overview():
 
         elif afdeling == "Job og sundhedd":
             show_job_og_sundhed_graph()
+
+        elif afdeling == "test":
+            show_test_graph()
