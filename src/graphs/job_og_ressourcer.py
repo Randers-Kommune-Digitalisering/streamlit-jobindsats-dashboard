@@ -163,7 +163,7 @@ def show_job_og_ressourcer_graph():
         st.plotly_chart(fig, use_container_width=True)
         if "qtij01_data" not in st.session_state:
             with st.spinner("Indlæser jobindsats_qtij01 data..."):
-                query=(
+                query = (
                     'SELECT "Område", "Ydelsesgrupper", "Periode", "Målgruppe",'
                     ' "Antal personer i alt", "antal personer med ordinære timer", '
                     '"Andel personer med ordinære timer." '
@@ -171,7 +171,7 @@ def show_job_og_ressourcer_graph():
                     "Gennemsnitlig antal ordinære timer  pr. måned"
                     'FROM jobindsats_qtij01'
                 )
-                columns =[
+                columns = [
                     "Område",
                     "Ydelsesgrupper",
                     "Periode",
@@ -205,7 +205,7 @@ def show_job_og_ressourcer_graph():
             df[col] = pd.to_numeric(df[col], errors="coerce")
             
 
-#filter for Randers
+# filter for Randers
         df_randers = df[df["Område"] == "Randers"].copy()
 
         if df_randers.empty:
