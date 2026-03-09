@@ -1,17 +1,17 @@
 import streamlit as st
 import plotly.graph_objects as go
 
-from utils.input_api_client import list_series, list_years, get_series_year, get_input_api_url
+from utils.inputs_db_connection import get_inputs_db
 
 
-
+db = get_inputs_db()
 
 
 def last_consecutive_years(years: list[int], max_years: int = 3) -> list[int]:
     if not years:
         return []
     ys = sorted(set(int(y) for y in years))
-    out = [ys[-1]]  # latest
+    out = [ys[-1]]
     while len(out) < max_years:
         nxt = out[-1] - 1
         if nxt in ys:
@@ -21,9 +21,82 @@ def last_consecutive_years(years: list[int], max_years: int = 3) -> list[int]:
     return out
 
 
+def list_series():
+    rows = db.execute_sql(
+        """
+        SELECT id, name
+        FROM app_series
+        ORDER BY name;
+        """
+    )
+    return [{"id": int(r[0]), "name": r[1]} for r in rows] if rows else []
+
+
+def list_years(series_id: int):
+    rows = db.execute_sql(
+        """
+        SELECT DISTINCT year
+        FROM (
+            SELECT year
+            FROM app_budget_entries
+            WHERE series_id = %s
+
+            UNION
+
+            SELECT year
+            FROM app_targets
+            WHERE series_id = %s
+        ) y
+        ORDER BY year;
+        """,
+        (series_id, series_id),
+    )
+    return [int(r[0]) for r in rows] if rows else []
+
+
+def get_latest_budget_for_year(series_id: int, year: int):
+    rows = db.execute_sql(
+        """
+        SELECT month, value
+        FROM (
+            SELECT DISTINCT ON (month)
+                month, value, entered_at
+            FROM app_budget_entries
+            WHERE series_id = %s AND year = %s
+            ORDER BY month, entered_at DESC
+        ) x
+        ORDER BY month;
+        """,
+        (series_id, year),
+    )
+    return [{"month": int(r[0]), "value": float(r[1])} for r in rows] if rows else []
+
+
+def get_latest_target_for_year(series_id: int, year: int):
+    rows = db.execute_sql(
+        """
+        SELECT target_value
+        FROM app_targets
+        WHERE series_id = %s AND year = %s
+        ORDER BY entered_at DESC
+        LIMIT 1;
+        """,
+        (series_id, year),
+    )
+    if not rows:
+        return None
+    return float(rows[0][0])
+
+
+def get_series_year(series_id: int, year: int):
+    return {
+        "budget": get_latest_budget_for_year(series_id, year),
+        "target": get_latest_target_for_year(series_id, year),
+    }
+
+
 def show_test_graph():
     st.subheader("Budget / Target graph")
-    st.caption(f"API: {get_input_api_url()}")
 
     # 1) Series list
     series_list = list_series()
@@ -50,11 +123,10 @@ def show_test_graph():
     # default: show just the selected year
     selected_years = [int(year)]
 
-    # if checked: show last consecutive years (e.g. 2026, 2025, 2024)
+    # if checked: show last consecutive years
     if show_last:
         selected_years = years_to_show
 
-    # 3) Plot budget + target for one or multiple years (overlay by month)
     month_names = {
         1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr",
         5: "Maj", 6: "Jun", 7: "Jul", 8: "Aug",
@@ -65,36 +137,32 @@ def show_test_graph():
 
     fig = go.Figure()
     fig.update_layout(
-        title=f"Budget per måned — {series_name} ({', '.join(map(str, selected_years))})"
+        title=f"Budget per måned — {series_name} ({', '.join(map(str, selected_years))})",
+        xaxis_title="Måned",
+        yaxis_title="Værdi",
     )
 
     for y in selected_years:
         data = get_series_year(series_id, int(y))
-        budget = data["budget"]   # [{month, value}, ...]
-        target = data["target"]   # float or None
+        budget = data["budget"]
 
-        # month -> value (sparse is fine)
         month_to_value = {int(p["month"]): float(p["value"]) for p in budget}
-
-        # align values to Jan..Dec (None = missing month)
         y_values = [month_to_value.get(m, None) for m in month_order]
 
-        # Budget line for that year
         if any(v is not None for v in y_values):
             fig.add_trace(go.Scatter(
                 x=x_months,
                 y=y_values,
                 mode="lines+markers",
-                name=str(y)   # legend shows just the year
+                name=str(y)
             ))
         else:
             st.info(f"Ingen budget for {y}.")
 
-    # Optional: only show target line when viewing a single year (avoids clutter)
+    # Only show target line for single-year view
     if len(selected_years) == 1:
         y = selected_years[0]
-        data = get_series_year(series_id, int(y))
-        target = data["target"]
+        target = get_latest_target_for_year(series_id, int(y))
         if target is not None:
             fig.add_hline(
                 y=float(target),
@@ -106,3 +174,5 @@ def show_test_graph():
             st.info(f"Ingen target for {y}.")
 
     st.plotly_chart(fig, use_container_width=True)
+    
+    show_test_graph()
