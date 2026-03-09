@@ -247,7 +247,6 @@ def show_job_og_ressourcer_graph():
             title=f"{selected_metric} – Randers"
         )
 
-
     except Exception as e:
         st.exception(e)
         return
