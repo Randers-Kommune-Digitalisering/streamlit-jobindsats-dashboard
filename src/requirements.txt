@@ -4,7 +4,6 @@ pandas
 pymssql
 py-healthcheck
 pysftp
-psycopg2
 prometheus-client
 python-dotenv
 requests==2.31.0
@@ -16,3 +15,6 @@ streamlit_option_menu
 streamlit-antd-components
 pymysql
 streamlit_shadcn_ui
+xlsxwriter
+plotly
+psycopg2-binary
