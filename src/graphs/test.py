@@ -175,4 +175,4 @@ def show_test_graph():
 
     st.plotly_chart(fig, use_container_width=True)
     
-    show_test_graph()
+show_test_graph()
