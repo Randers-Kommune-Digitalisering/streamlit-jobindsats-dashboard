@@ -1,6 +1,5 @@
 import streamlit as st
 import plotly.graph_objects as go
-
 from utils.inputs_db_connection import get_inputs_db
 
 
