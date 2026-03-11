@@ -13,7 +13,7 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "Jobindsats",
-        ["Jobcenter Randers", "Fremtidens Randers", "Ydelser", "Datakatalog", "Om"],
+        ["JobRanders", "Fremtidens Randers", "Ydelser", "Datakatalog", "Om"],
         default_index=0,
         icons=['bi bi-building', 'bi bi-rocket-takeoff', 'bi bi-bar-chart-line', 'bi bi-database', 'bi bi-info-lg'],
         menu_icon="bi bi-person-walking",
@@ -34,5 +34,5 @@ elif selected == "Fremtidens Randers":
     get_ydelsesgrupper_overview()
 elif selected == "Ydelser":
     get_ydelser_overview()
-elif selected == "Jobcenter Randers":
+elif selected == "JobRanders":
     get_jobcenter_randers_overview()

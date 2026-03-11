@@ -96,12 +96,12 @@ def get_series_year(series_id: int, year: int):
 
 
 def show_test_graph():
-    st.subheader("Budget / Target graph")
+    st.subheader("Budget /  mål graf")
 
     # 1) Series list
     series_list = list_series()
     if not series_list:
-        st.info("No series found.")
+        st.info("ingen serie fundet.")
         return
 
     name_to_id = {s["name"]: s["id"] for s in series_list}
@@ -111,10 +111,10 @@ def show_test_graph():
     # 2) Years for series
     years = list_years(series_id)
     if not years:
-        st.info("No years found for this series (no budget/targets yet).")
+        st.info("ingen år fundet for denne serie (ingen budget/mål endnu).")
         return
 
-    year = st.selectbox("Year", options=years, index=len(years) - 1)
+    year = st.selectbox("år", options=years, index=len(years) - 1)
 
     years_to_show = last_consecutive_years(years, max_years=3)
 
@@ -171,8 +171,6 @@ def show_test_graph():
                 annotation_position="top left",
             )
         else:
-            st.info(f"Ingen target for {y}.")
+            st.info(f"Ingen mål for {y}.")
 
     st.plotly_chart(fig, use_container_width=True)
-    
-show_test_graph()
