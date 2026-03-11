@@ -1,14 +1,15 @@
 import os
 import psycopg2
+from config import JOBINDSATS_POSTGRES_DB_HOST, JOBINDSATS_POSTGRES_DB_USER, JOBINDSATS_POSTGRES_DB_PASS, JOBINDSATS_POSTGRES_DB_DATABASE, JOBINDSATS_POSTGRES_DB_PORT
 
 
 class InputsDBConnection:
     def __init__(self):
-        self.host = os.getenv("INPUTS_DB_HOST", "localhost")
-        self.port = int(os.getenv("INPUTS_DB_PORT", "5434"))
-        self.database = os.getenv("INPUTS_DB_NAME", "inputs_db")
-        self.username = os.getenv("INPUTS_DB_USER", "inputs_user")
-        self.password = os.getenv("INPUTS_DB_PASS", "inputs_pass")
+        self.host = JOBINDSATS_POSTGRES_DB_HOST
+        self.port = JOBINDSATS_POSTGRES_DB_PORT
+        self.database = JOBINDSATS_POSTGRES_DB_DATABASE
+        self.username = JOBINDSATS_POSTGRES_DB_USER
+        self.password = JOBINDSATS_POSTGRES_DB_PASS
 
     def execute_sql(self, sql: str, params=None):
         conn = psycopg2.connect(
