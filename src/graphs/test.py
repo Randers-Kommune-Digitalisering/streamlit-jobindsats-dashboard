@@ -5,6 +5,60 @@ from utils.inputs_db_connection import get_inputs_db
 
 db = get_inputs_db()
 
+import streamlit as st
+import plotly.graph_objects as go
+from utils.inputs_db_connection import get_inputs_db
+
+
+db = get_inputs_db()
+
+
+def schema_setup():
+    db.execute_sql("""
+        CREATE TABLE IF NOT EXISTS app_series (
+            id SERIAL PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL
+        );
+    """)
+
+    db.execute_sql("""
+        CREATE TABLE IF NOT EXISTS app_budget_entries (
+            id BIGSERIAL PRIMARY KEY,
+            series_id INT NOT NULL REFERENCES app_series(id),
+            year INT NOT NULL,
+            month INT NOT NULL CHECK (month BETWEEN 1 AND 12),
+            value NUMERIC NOT NULL,
+            entered_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            entered_by TEXT NOT NULL
+        );
+    """)
+
+    db.execute_sql("""
+        CREATE INDEX IF NOT EXISTS idx_budget_latest
+        ON app_budget_entries(series_id, year, month, entered_at DESC);
+    """)
+
+    db.execute_sql("""
+        CREATE TABLE IF NOT EXISTS app_targets (
+            id BIGSERIAL PRIMARY KEY,
+            series_id INT NOT NULL REFERENCES app_series(id),
+            target_value NUMERIC NOT NULL,
+            entered_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            entered_by TEXT NOT NULL
+        );
+    """)
+
+    db.execute_sql("""
+        CREATE INDEX IF NOT EXISTS idx_targets_latest
+        ON app_targets(series_id, entered_at DESC);
+    """)
+
+
+try:
+    schema_setup()
+except Exception as e:
+    st.error(f"Database schema setup failed: {e}")
+    st.stop()
 
 def last_consecutive_years(years: list[int], max_years: int = 3) -> list[int]:
     if not years:
@@ -34,24 +88,23 @@ def list_series():
 def list_years(series_id: int):
     rows = db.execute_sql(
         """
-        SELECT DISTINCT year
+        SELECT y.year
         FROM (
-            SELECT year
-            FROM app_budget_entries
-            WHERE series_id = %s
+            SELECT DISTINCT b.year AS year
+            FROM app_budget_entries b
+            WHERE b.series_id = %s
 
             UNION
 
-            SELECT year
-            FROM app_targets
-            WHERE series_id = %s
-        ) y
-        ORDER BY year;
+            SELECT DISTINCT EXTRACT(YEAR FROM t.entered_at)::INT AS year
+            FROM app_targets t
+            WHERE t.series_id = %s
+        ) AS y
+        ORDER BY y.year;
         """,
         (series_id, series_id),
     )
     return [int(r[0]) for r in rows] if rows else []
-
 
 def get_latest_budget_for_year(series_id: int, year: int):
     rows = db.execute_sql(
@@ -76,16 +129,14 @@ def get_latest_target_for_year(series_id: int, year: int):
         """
         SELECT target_value
         FROM app_targets
-        WHERE series_id = %s AND year = %s
+        WHERE series_id = %s
+          AND EXTRACT(YEAR FROM entered_at)::INT = %s
         ORDER BY entered_at DESC
         LIMIT 1;
         """,
         (series_id, year),
     )
-    if not rows:
-        return None
-    return float(rows[0][0])
-
+    return float(rows[0][0]) if rows else None
 
 def get_series_year(series_id: int, year: int):
     return {

@@ -12,7 +12,7 @@ db_client = get_jobindsats_db()
 
 def get_jobcenter_randers_overview():
     with st.sidebar:
-        st.markdown("## Jobcenter Randers")
+        st.markdown("## JobRanders")
 
         afdeling = sac.tree(
             items=[
@@ -34,7 +34,7 @@ def get_jobcenter_randers_overview():
             color='#4a4a4a'
         )
 
-    st.title("Jobcenter Randers")
+    st.title("JobRanders")
     if afdeling is None:
         st.subheader("Vælg en afdeling i venstre side")
     else:
