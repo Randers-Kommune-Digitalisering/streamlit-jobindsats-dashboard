@@ -186,6 +186,7 @@ def get_ydelser_overview():
                 )
 
                 overlay_chart_df = pd.DataFrame()
+                overlay_target_value = None
 
                 if overlay_input_series and selected_input_series_id is not None and selected_input_year is not None:
                     input_rows = fetch_input_budget_for_series_year(
@@ -193,11 +194,23 @@ def get_ydelser_overview():
                         int(selected_input_year)
                     )
 
+                    target_rows = input_db_client.execute_sql("""
+                        SELECT target_value
+                        FROM app_targets
+                        WHERE series_id = %s
+                        AND EXTRACT(YEAR FROM entered_at)::INT = %s
+                        ORDER BY entered_at DESC
+                        LIMIT 1;
+                    """, (selected_input_series_id, int(selected_input_year)))
+
+                    if target_rows:
+                        overlay_target_value = float(target_rows[0][0])
+
                     if input_rows:
                         overlay_chart_df = pd.DataFrame(input_rows, columns=["Måned", "Værdi"])
                         overlay_chart_df["År"] = str(selected_input_year)
                         overlay_chart_df["MånedNavn"] = overlay_chart_df["Måned"].map(month_map)
-                        overlay_chart_df["Serie"] = f"Input: {selected_input_series_name}"
+                        overlay_chart_df["Serie"] = f"Input-serie: {selected_input_series_name}"
                         overlay_chart_df["Værdi"] = pd.to_numeric(overlay_chart_df["Værdi"], errors="coerce")
                         overlay_chart_df["MånedNavn"] = pd.Categorical(
                             overlay_chart_df["MånedNavn"],
@@ -221,14 +234,17 @@ def get_ydelser_overview():
                     ]
                 )
 
+                layers = [base_chart]
+
                 if not overlay_chart_df.empty:
                     overlay_line = alt.Chart(overlay_chart_df).mark_line(
                         point=True,
-                        strokeDash=[6, 4]
+                        strokeDash=[6, 4],
+                        color="#d62728"
                     ).encode(
                         x=alt.X('MånedNavn:N', title='Måned', sort=month_order),
                         y=alt.Y('Værdi:Q', title=selected_udfaldsmål),
-                        color=alt.value("#d62728"),
+                        detail='Serie:N',
                         tooltip=[
                             alt.Tooltip('Serie:N', title='Serie'),
                             alt.Tooltip('År:N', title='År'),
@@ -237,12 +253,37 @@ def get_ydelser_overview():
                         ]
                     )
 
-                    chart = (base_chart + overlay_line).properties(width=900, height=400)
-                else:
-                    chart = base_chart.properties(width=900, height=400)
+                    layers.append(overlay_line)
+
+                if overlay_target_value is not None:
+                    target_df = pd.DataFrame({
+                        "y": [overlay_target_value],
+                        "Label": [f"Mål: {selected_input_series_name} ({selected_input_year})"]
+                    })
+
+                    target_rule = alt.Chart(target_df).mark_rule(
+                        strokeDash=[2, 2],
+                        color="#ff7f0e"
+                    ).encode(
+                        y='y:Q',
+                        tooltip=[
+                            alt.Tooltip('Label:N', title='Mål'),
+                            alt.Tooltip('y:Q', title='Værdi', format='.2f')
+                        ]
+                    )
+
+                    layers.append(target_rule)
+
+                chart = alt.layer(*layers).properties(width=900, height=400)
 
                 st.altair_chart(chart, use_container_width=True)
 
+                if not overlay_chart_df.empty:
+                    st.caption(f"Rød stiplet linje = Input-serie: {selected_input_series_name}")
+
+                if overlay_target_value is not None:
+                    st.caption(f"Orange stiplet linje = Mål for input-serie: {selected_input_series_name} ({selected_input_year})")
+              
                 export_df = chart_df.copy()
                 export_df = export_df.rename(columns={"Værdi": selected_udfaldsmål})
 
