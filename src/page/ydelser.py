@@ -3,9 +3,10 @@ import pandas as pd
 import altair as alt
 from io import BytesIO
 from utils.database_connection import get_jobindsats_db
+from utils.inputs_db_connection import get_inputs_db
 from utils.jobindsats_utils import ydelser_udfaldsmål_options, ydelser
 import streamlit_antd_components as sac
-from utils.inputs_db_connection import get_inputs_db
+
 
 
 db_client = get_jobindsats_db()
