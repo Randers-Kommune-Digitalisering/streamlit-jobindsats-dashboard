@@ -8,7 +8,6 @@ from utils.jobindsats_utils import ydelser_udfaldsmål_options, ydelser
 import streamlit_antd_components as sac
 
 
-
 db_client = get_jobindsats_db()
 input_db_client = get_inputs_db()
 
