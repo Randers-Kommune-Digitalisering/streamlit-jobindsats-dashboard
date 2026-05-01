@@ -1,4 +1,5 @@
 import streamlit as st
+from graphs.cjk import cjk_page
 from utils.database_connection import get_jobindsats_db
 from graphs.job_og_ressourcer import show_job_og_ressourcer_graph
 from graphs.job_og_sundhed import show_job_og_sundhed_graph
@@ -19,11 +20,10 @@ def get_jobcenter_randers_overview():
                 sac.TreeItem("Center for Job og Udvikling", children=[
                     sac.TreeItem("Job og løntimer"),
                     sac.TreeItem("Job og ressourcer"),
-                    sac.TreeItem("Job og sundhedd"),
-                    sac.TreeItem("UUR"),
-                    sac.TreeItem("test")
+                    sac.TreeItem("Job og sundhed")
                 ]),
                 sac.TreeItem("Center for Job og Kompetencer")
+
             ],
             index=0,
             size="lg",
@@ -39,6 +39,8 @@ def get_jobcenter_randers_overview():
         st.subheader("Vælg en afdeling i venstre side")
     else:
         st.subheader(afdeling)
+        if afdeling == "Center for Job og Kompetencer":
+            cjk_page()
         if afdeling == "Job og ressourcer":
             show_job_og_ressourcer_graph()
 
