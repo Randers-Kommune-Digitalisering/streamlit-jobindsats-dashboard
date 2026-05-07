@@ -1,11 +1,12 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
+from page.forside import show_forside
 from page.sygedagpenge import get_sygedagpenge_overview
 from page.jobindsats_overview import show_jobindsats_metadata_overview
 from page.fremtidens_randers import get_ydelsesgrupper_overview
 from page.ydelser import get_ydelser_overview
-from page.jobcenter_randers import get_jobcenter_randers_overview
+from page.jobranders import get_jobcenter_randers_overview
 
 st.set_page_config(page_title="Jobindsats", page_icon="assets/favicon.ico", layout="wide")
 
@@ -13,9 +14,9 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "Jobindsats",
-        ["JobRanders", "Fremtidens Randers", "Ydelser", "Datakatalog", "Om"],
+        ["Forside", "JobRanders", "Fremtidens Randers", "Ydelser", "Datakatalog", "Om"],
         default_index=0,
-        icons=['bi bi-building', 'bi bi-rocket-takeoff', 'bi bi-bar-chart-line', 'bi bi-database', 'bi bi-info-lg'],
+        icons=['bi bi-house', 'bi bi-building', 'bi bi-rocket-takeoff', 'bi bi-bar-chart-line', 'bi bi-database', 'bi bi-info-lg'],
         menu_icon="bi bi-person-walking",
         styles={
             "container": {"padding": "5px", "background-color": "#f0f0f0"},
@@ -26,7 +27,9 @@ with st.sidebar:
         }
     )
 
-if selected == "Sygedagpenge":
+if selected == "Forside":
+    show_forside()
+elif selected == "Sygedagpenge":
     get_sygedagpenge_overview()
 elif selected == "Datakatalog":
     show_jobindsats_metadata_overview()
