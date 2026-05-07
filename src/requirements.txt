@@ -18,3 +18,4 @@ streamlit_shadcn_ui
 xlsxwriter
 plotly
 psycopg2-binary
+matplotlib
