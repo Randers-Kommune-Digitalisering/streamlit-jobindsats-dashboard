@@ -16,6 +16,13 @@ def cjk_page():
     st.text("Overordnede mål")
     st.text("1. Sæsonkorrigeret ledighedsudvikling")
 
+    querytest = (
+        'SELECT * from jobindsats_y25i01'
+    )
+    resulttest = db_client.execute_sql(querytest)
+    dftest = pd.DataFrame(resulttest)
+
+    st.write(dftest)
 
     query = (
         'SELECT "Område", "Periode", "Antal ledige personer", "Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", "Ledige fuldtidspersoner i pct. af befolkningen16-66 år" FROM jobindsats_y25i01 where "Område" IN (\'Randers\', \'Aarhus\', \'Favrskov\', \'Horsens\', \'Norddjurs\', \'Odder\', \'Randers\', \'Samsø\',  \'Skanderborg\',  \'Syddjurs\') order by "Periode" desc;'
