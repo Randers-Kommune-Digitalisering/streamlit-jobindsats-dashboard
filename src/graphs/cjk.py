@@ -1,30 +1,29 @@
 import streamlit as st
-import altair as alt
 import pandas as pd
-import plotly.express as px
 from utils.database_connection import get_jobindsats_db
 from matplotlib.ticker import FuncFormatter
 
 db_client = get_jobindsats_db()
 
+
 def date_parser(df, date_column):
     df[date_column] = pd.to_datetime(df[date_column].str.replace('M', '-'), format='%Y-%m')
     return df
 
+
 def percent_comma(x, pos):
     return f"{x:,.1f}%".replace('.', ',')
+
 
 def thousands_dot(x, pos):
     return f"{int(x):,}".replace(",", ".")
 
 
 def cjk_page():
-
     st.header("Overordnede mål")
-    
     today = pd.to_datetime("today")
 
-    ## Mål 1.a og 1.b 
+    # Mål 1.a og 1.b
     query = (
         'SELECT "Område", "Periode", "Antal ledige personer", "Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", "Ledige fuldtidspersoner i pct. af befolkningen16-66 år" FROM jobindsats_y25i01 where "Område" IN (\'Randers\', \'Aarhus\', \'Favrskov\', \'Horsens\', \'Norddjurs\', \'Odder\', \'Samsø\',  \'Skanderborg\',  \'Syddjurs\') order by "Periode" desc;'
     )
@@ -33,20 +32,23 @@ def cjk_page():
 
     df = pd.DataFrame(result, columns=["Område", "Periode", "Antal ledige personer", "Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", "Ledige fuldtidspersoner i pct. af befolkningen16-66 år"])
 
-    with st.container():
-        
-        col1, col2 = st.columns([1,3], vertical_alignment="top", gap="large")
+    with st.container(border=1):
+        st.subheader("1.a - Sæsonkorrigeret ledighedsudvikling i pct. af arbejdsstyrken 16-66 år")
+        col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
         with col1:
-            st.subheader("1.a Sæsonkorrigeret ledighedsudvikling i pct. af arbejdsstyrken 16-66 år")
             st.markdown("""
-                | Forklaringer  |  |
-                |---------------|------------------------|  
-                | **Mål:**      | ... |  
-                | **Kilde:**    | Jobindsats - y25i01 | 
-                | **Noter:**    | Østjylland: Aarhus, Favrskov, Horsens, Norddjurs, Odder, Samsø, Skanderborg og Syddjurs | 
-            """)
+                #### Mål
+                ...
 
-        with col2:    
+                #### Noter
+                Østjylland: Aarhus, Favrskov, Horsens, Norddjurs, Odder, Samsø, Skanderborg og Syddjurs
+
+                #### Kilde
+                Jobindsats.dk
+
+                    y25i01
+            """)
+        with col2:
             chart_df = df[["Område", "Periode", "Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"]]
             chart_df["Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"] = pd.to_numeric(chart_df["Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"], errors='coerce')
 
@@ -73,24 +75,27 @@ def cjk_page():
             ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
-            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
         
-    with st.container():
-        
-        col1, col2 = st.columns([1,3], vertical_alignment="top", gap="large")
+    with st.container(border=1):
+        st.subheader("1.b - Sæsonkorrigeret ledighedsudvikling i pct. af befolkningen 16-66 år")
+        col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
         with col1:
-            st.subheader("1.b Sæsonkorrigeret ledighedsudvikling i pct. af befolkningen 16-66 år")
             st.markdown("""
-                | Forklaringer  |  |
-                |---------------|------------------------|
-                | **Mål:**      | ... |    
-                | **Kilde:**    | Jobindsats - y25i01 | 
-                | **Noter:**    | Østjylland: Aarhus, Favrskov, Horsens, Norddjurs, Odder, Samsø, Skanderborg og Syddjurs | 
-            """)
+                #### Mål
+                ...
 
-        with col2: 
+                #### Noter
+                Østjylland: Aarhus, Favrskov, Horsens, Norddjurs, Odder, Samsø, Skanderborg og Syddjurs
+
+                #### Kilde
+                Jobindsats.dk
+
+                    y25i01
+            """)
+        with col2:
 
             chart_df1 = df[["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen16-66 år"]]
             chart_df1["Ledige fuldtidspersoner i pct. af befolkningen16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen16-66 år"], errors='coerce')
@@ -117,13 +122,13 @@ def cjk_page():
             ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
-            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
 
-    ## Mål 2:
+    # Mål 2:
 
-    ### Dagpenge
+    # Dagpenge
     query_dp = (
         'SELECT "Periode", "Antal fuldtidspersoner" FROM jobindsats_y01a02 where "Område" IN (\'Randers\') order by "Periode" desc;'
     )
@@ -132,31 +137,64 @@ def cjk_page():
 
     df_dp = pd.DataFrame(result_dp, columns=["Periode", "Antal fuldtidspersoner"])
     df_dp["Ydelse"]="Dagpengemodtagere"
-    
 
-    ### Jobparate kontanthjælpsmodtagere
+    # Jobparate kontanthjælpsmodtagere
     query_jpkh = (
-        'SELECT "Periode", "Antal fuldtidspersoner" FROM jobindsats_y60a02 where "Område" IN (\'Randers\') and "Visitationskategori" IN (\'Jobparat\') order by "Periode" desc;'
+        'SELECT "Periode", "Antal fuldtidspersoner" FROM jobindsats_y60a02jobparat_satser where "Område" IN (\'Randers\') and "Visitationskategori" IN (\'Jobparat\') and "Kontanthjælpssats" IN (\'Forhøjet sats\',\'Grundsats\') order by "Periode" desc;'
     )
 
     result_jpkh = db_client.execute_sql(query_jpkh)
     df_jpkh = pd.DataFrame(result_jpkh, columns=["Periode", "Antal fuldtidspersoner"])
-    df_jpkh["Ydelse"]="Jobparate kontanthjælpsmodtagere"
+    df_jpkh["Ydelse"] = "Jobparate kontanthjælpsmodtagere"
 
-    ### Samlet dataframe
-    df = pd.concat([df_dp, df_jpkh], ignore_index=True)
+    # Integrationsborgere
+    query_int = (
+        'SELECT "Periode", "Antal fuldtidspersoner" FROM jobindsats_y60a02satser where "Område" IN (\'Randers\') and "Kontanthjælpssats" IN (\'Mindstesats omfattet af program\',\'Mindstesats øvrige\') order by "Periode" desc;'
+    )
 
-    with st.container():
-        
-        col1, col2 = st.columns([1,3], vertical_alignment="top", gap="large")
+    result_int = db_client.execute_sql(query_int)
+    df_int = pd.DataFrame(result_int, columns=["Periode", "Antal fuldtidspersoner"])
+    df_int["Ydelse"] = "Integrationsborgere"
+
+    # Ledighedsydelsesmodtagere
+    query_lyd = (
+        'SELECT "Periode", "Antal fuldtidspersoner" FROM jobindsats_y09a02 where "Område" IN (\'Randers\') order by "Periode" desc;'
+    )
+
+    result_lyd = db_client.execute_sql(query_lyd)
+    df_lyd = pd.DataFrame(result_lyd, columns=["Periode", "Antal fuldtidspersoner"])
+    df_lyd["Ydelse"] = "Ledighedsydelsesmodtagere"
+
+    # Samlet dataframe
+    df = pd.concat([df_dp, df_jpkh, df_int, df_lyd], ignore_index=True)
+
+    with st.container(border=1):
+        st.subheader("2.a - Antal på offentlig forsørgelse i CJK")
+        col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
         with col1:
-            st.subheader("2.a Antal på offentlig forsørgelse i CJK")
             st.markdown("""
-                | Forklaringer  |  |
-                |---------------|------------------------|
-                | **Mål:**      | Reduktion ift. baseline |    
-                | **Kilde:**    | Jobindsats: y01a02 (dagpenge), kontanthjælp (y60a02)| 
-                | **Noter:**    | Ydelsesgrupper: A-dagpengemodtagere, jobparate kontakthjælpsmodtagere, integrationsborgere, ledighedsydelsesmodtagere | 
+                #### Mål
+                Reduktion ift. baseline
+
+                #### Noter
+                Ydelsesgrupperne er:
+
+                * A-dagpengemodtagere
+                * Jobparate kontanthjælpsmodtagere
+                    * Kontanthjælp forhøjet sats
+                    * Kontanthjælp grundsats
+                * Integrationsborgere 
+                    * Kontanthjælp mindstesats omfattet af program
+                    * Kontanthjælp mindstesats øvrige
+                * Ledighedsydelsesmodtagere
+
+                #### Kilde
+                Jobindsats.dk
+
+                    y01a02 (dagpenge)
+                    y60a02 (kontanthjælp)
+                    y09a02 (ledighedsydelse)
+
             """)
 
         with col2:
@@ -175,7 +213,7 @@ def cjk_page():
             # Pyplot chart for the same data
             fig, ax = plt.subplots(figsize=(8, 4))
             colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-            ax.plot(chart_df['Periode'], chart_df['Antal fuldtidspersoner'], label='Antal', color=colors.get('Randers', 'black'))
+            ax.plot(chart_df['Periode'], chart_df['Antal fuldtidspersoner'], label='Fuldtidspersoner', color=colors.get('Randers', 'black'))
             ax.set_xlabel('Tid')
             ax.set_ylabel('Fuldtidspersoner')
             ax.set_title('Antal fuldtidspersoner på offentlig forsørgelse i CJK')
@@ -183,28 +221,37 @@ def cjk_page():
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
             ax.yaxis.set_major_formatter(FuncFormatter(thousands_dot))
-            ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
 
     with st.container(border=1):
-        st.subheader("2.b Antal på offentlig forsørgelse i CJK opdelt på målgruppe")
-        col1, col2 = st.columns([1,3], vertical_alignment="top", gap="large")
+        st.subheader("2.b - Antal på offentlig forsørgelse i CJK opdelt på målgruppe")
+        col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
         
         with col1:
             st.markdown(""" 
                 #### Mål 
                 Reduktion ift. baseline
 
-                #### Noter
-                Ydelsesgrupper er a-dagpengemodtagere, jobparate kontanthjælpsmodtagere, integrationsborgere, ledighedsydelsesmodtagere 
+                Ydelsesgrupperne er:
 
-                #### Kilde 
+                * A-dagpengemodtagere
+                * Jobparate kontanthjælpsmodtagere
+                    * Kontanthjælp forhøjet sats
+                    * Kontanthjælp grundsats
+                * Integrationsborgere 
+                    * Kontanthjælp mindstesats omfattet af program
+                    * Kontanthjælp mindstesats øvrige
+                * Ledighedsydelsesmodtagere
+
+                #### Kilde
                 Jobindsats.dk
-          
-                    y01a02 (dagpenge)
-                    y60a02 (kontanthjælp)        
 
+                    y01a02 (dagpenge)
+                    y60a02 (kontanthjælp)
+                    y09a02 (ledighedsydelse)
+                        
             """)
 
         with col2:
@@ -221,9 +268,9 @@ def cjk_page():
 
             # Pyplot chart for the same data
             fig, ax = plt.subplots(figsize=(8, 4))
-            colors = {'Dagpengemodtagere': '#00B050', 'Jobparate kontanthjælpsmodtagere': '#FFC000'}
+            colors = {'Dagpengemodtagere': '#00B050', 'Jobparate kontanthjælpsmodtagere': '#FFC000', 'Integrationsborgere': '#FF0000', 'Ledighedsydelsesmodtagere': '#0000FF'}
             for ydelse, group in grouped_df.groupby("Ydelse"): 
-                ax.plot(group['Periode'], group['Antal fuldtidspersoner'], label=ydelse, color=colors.get(ydelse, 'black'))
+                ax.plot(group['Periode'], group['Antal fuldtidspersoner'], label = ydelse, color=colors.get(ydelse, 'black'))
             ax.set_xlabel('Tid')
             ax.set_ylabel('Fuldtidspersoner')
             ax.set_title('Antal fuldtidspersoner på offentlig forsørgelse i CJK')
@@ -234,4 +281,3 @@ def cjk_page():
             ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
-
