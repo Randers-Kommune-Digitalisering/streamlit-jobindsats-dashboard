@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils.database_connection import get_jobindsats_db
 from matplotlib.ticker import FuncFormatter
+import matplotlib.pyplot as plt
 
 db_client = get_jobindsats_db()
 
@@ -61,8 +62,6 @@ def cjk_page():
 
             chart_df["Område_split"] = chart_df["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
             grouped_df = chart_df.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år'].mean().reset_index()
-
-            import matplotlib.pyplot as plt
 
             fig, ax = plt.subplots(figsize=(8, 4))
             colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
@@ -234,6 +233,7 @@ def cjk_page():
                 #### Mål 
                 Reduktion ift. baseline
 
+                #### Noter
                 Ydelsesgrupperne er:
 
                 * A-dagpengemodtagere
@@ -264,11 +264,11 @@ def cjk_page():
             chart_df["Måned"] = chart_df["Periode"].dt.month
 
             chart_df = chart_df[chart_df["År"] >= today.year - 2 ]
-            grouped_df = chart_df.groupby(['Periode', 'Ydelse'])['Antal fuldtidspersoner'].mean().reset_index()
+            grouped_df = chart_df.groupby(['Periode', 'Ydelse'])['Antal fuldtidspersoner'].sum().reset_index()
 
             # Pyplot chart for the same data
             fig, ax = plt.subplots(figsize=(8, 4))
-            colors = {'Dagpengemodtagere': '#00B050', 'Jobparate kontanthjælpsmodtagere': '#FFC000', 'Integrationsborgere': '#FF0000', 'Ledighedsydelsesmodtagere': '#0000FF'}
+            colors = {'Dagpengemodtagere': '#00B050', 'Jobparate kontanthjælpsmodtagere': '#FFC000', 'Integrationsborgere': '#FF0000', 'Ledighedsydelsesmodtagere': '#00B0F0'}
             for ydelse, group in grouped_df.groupby("Ydelse"): 
                 ax.plot(group['Periode'], group['Antal fuldtidspersoner'], label = ydelse, color=colors.get(ydelse, 'black'))
             ax.set_xlabel('Tid')
@@ -279,5 +279,66 @@ def cjk_page():
             ax.spines['right'].set_visible(False)
             ax.yaxis.set_major_formatter(FuncFormatter(thousands_dot))
             ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+            fig.autofmt_xdate()
+            st.pyplot(fig, use_container_width=False)
+
+    # Mål 3:
+
+    query = (
+        'SELECT "Periode", "Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m", "Opdeling af ydelser", "Område" FROM jobindsats_y25i08 where "Område" IN (\'Randers\', \'Hele landet\') order by "Periode" asc;'
+    )
+
+    result = db_client.execute_sql(query)
+
+    df = pd.DataFrame(result, columns=["Periode", "Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m", "Opdeling af ydelser", "Område"])
+    df["Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m"] = pd.to_numeric(df["Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m"], errors='coerce')
+    df["Periode"] = df["Periode"].str.replace('QMAT0', '-K')
+
+    df["År"] = df["Periode"].str[:4].astype(int)
+    df = df[df["År"] >= today.year - 4]
+
+
+    with st.container(border=1):
+        st.subheader("3.a - Afgang til beskæftigelse 6 måneder efter nyledighed")
+        col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
+        
+        with col1:
+            st.markdown(""" 
+                #### Mål 
+                Reduktion ift. baseline
+
+                #### Noter
+                Ydelsesgrupperne er:
+
+                * A-dagpengemodtagere
+                * Kontanthjælpsmodtagere
+
+                Grafen viser gennemsnit seneste 4 kvartaler
+
+                #### Kilde
+                Jobindsats.dk
+
+                    y25i08 
+               
+            """)
+
+        with col2:
+            chart_df = df[df["Opdeling af ydelser"] == "I alt"]
+
+            fig, ax = plt.subplots(figsize=(8, 4))
+            colors = {'Randers': '#00B050', 'Hele landet': '#FFC000'}
+            for område, group in chart_df.groupby("Område"):
+                ax.plot(group['Periode'], group['Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m'], label=område, color=colors.get(område, 'black'))
+            ax.set_xlabel('Tid')
+            ax.set_ylabel('Procent')
+            ax.set_title('Andel i beskæftigelse 6 måneder efter nyledighed')
+            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            handles, labels = ax.get_legend_handles_labels()
+            sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: 0 if x[1] == "Randers" else 1)
+            handles, labels = zip(*sorted_handles_labels)
+            ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
