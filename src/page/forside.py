@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def show_forside():
     st.title("Forside")
     st.markdown("## Velkommen til Randers Kommunes jobindsats-dashboardet")
@@ -9,12 +10,12 @@ def show_forside():
     st.markdown("Data på arbejdsamarkedsområdet fra kommunes KMD Insight-løsning (BI) kan tilgås via [KMD Insight](https://ssolaunchpad.kmd.dk/SSO/Redirect?https://kmd-opus-ledelsesinformation.kmd.dk/BOE/OpenDocument/opendoc/openDocument.jsp?sIDType=CUID&iDocID=AZk._LD5leVIvvXtHie8kM0&sViewer=fiori&kommune=730) " )
     st.markdown("""
         ## Indhold
-  
         | Menupunkt         | Beskrivelse
         |---------------------------|-------------------------------------|
         | ***JobRanders***     | Måltal for centre og afdelinger i JobRanders (under udvikling) | 
-        | ***Ydelser***          | Udvikling i enkeltydelser over tid (under udvikling) | 
+        | ***Politisk betjening***    | Diverse grafer og datatræk til løbende politisk betjening (under udvikling) |
         | ***Fremtidens Randers***    | Diverse grafer i relation til Fremtidens Randers (under udvikling) |
+        | ***Ydelser***          | Udvikling i enkeltydelser over tid (under udvikling) |
         | ***Datakatalog***                | Katalog over tilgængelige data fra api.jobindsats.dk  | 
-        | ***Om***          | Om denne side | 
+        | ***Om***          | Om denne side |
     """)
