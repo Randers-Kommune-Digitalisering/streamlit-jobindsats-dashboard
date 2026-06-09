@@ -19,7 +19,7 @@ ydelser_udfaldsmål_options = [
 
 ydelser = {
     "A-Dagpenge": {"table": "jobindsats_y01a02", "periode_col": "Periode A-Dagpenge"},
-    "Kontanthjælp(Satser)": {"table": "jobindsats_y60a02satsery60a02", "periode_col": "Periode Kontanthjælp (satser)"},
+    "Kontanthjælp(Satser)": {"table": "jobindsats_y60a02satser", "periode_col": "Periode Kontanthjælp (satser)"},
     "Sygedagpenge": {"table": "jobindsats_y07a02", "periode_col": "Periode Sygedagpenge"},
     "Fleksjob": {"table": "jobindsats_y08a02", "periode_col": "Periode Fleksjob"},
     "Ledighedsydelse": {"table": "jobindsats_y09a02", "periode_col": "Periode Ledighedsydelse"},
