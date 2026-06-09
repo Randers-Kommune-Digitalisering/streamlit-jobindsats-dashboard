@@ -16,13 +16,13 @@ def cju_page():
     today = pd.to_datetime("today")
 
     query = (
-        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct. " FROM jobindsats_y07b15 where "Område" IN (\'Randers\') order by "Periode" asc;'
+        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct." FROM jobindsats_y07b15 where "Område" IN (\'Randers\') order by "Periode" asc;'
     ) 
 
     result = db_client.execute_sql(query)
 
-    df = pd.DataFrame(result, columns=["Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct. "])
-    df["Status 3 mdr. efter afsluttet forløb, pct. "] = pd.to_numeric(df["Status 3 mdr. efter afsluttet forløb, pct. "], errors='coerce')
+    df = pd.DataFrame(result, columns=["Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct."])
+    df["Status 3 mdr. efter afsluttet forløb, pct."] = pd.to_numeric(df["Status 3 mdr. efter afsluttet forløb, pct."], errors='coerce')
     df["Periode"] = df["Periode"].str.replace('QMAT0', '-K')
     df["År"] = df["Periode"].str[:4].astype(int)
     df = df[df["År"] >= today.year - 4]
@@ -47,7 +47,7 @@ def cju_page():
             fig, ax = plt.subplots(figsize=(8, 4))
             colors = {'Lønmodtagerbeskæftigelse': '#00B050', 'Uddannelse': '#FFC000', 'Fleksjob': '#FF0000', 'Selvforsørgelse': '#00B0F0'}
             for Arbejdsmarkedsstatus, group in df.groupby("Arbejdsmarkedsstatus"):
-                ax.plot(group['Periode'], group['Status 3 mdr. efter afsluttet forløb, pct. '], label=Arbejdsmarkedsstatus, color=colors.get(Arbejdsmarkedsstatus, 'black'))
+                ax.plot(group['Periode'], group['Status 3 mdr. efter afsluttet forløb, pct.'], label=Arbejdsmarkedsstatus, color=colors.get(Arbejdsmarkedsstatus, 'black'))
             ax.set_xlabel('Tid')
             ax.set_ylabel('Procent')
             ax.set_title('Sygedagpangemodtagere: Status 3 mdr. efter afsluttet forløb, pct.')
@@ -62,15 +62,14 @@ def cju_page():
             fig.autofmt_xdate()
             st.pyplot(fig, use_container_width=False)
 
-    
     query = (
-        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct. " FROM jobindsats_y60b15 where "Område" IN (\'Randers\') and "Visitationskategori" in (\'Aktivitetsparat\') order by "Periode" asc;'
+        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct." FROM jobindsats_y60b15 where "Område" IN (\'Randers\') and "Visitationskategori" in (\'Aktivitetsparat\') order by "Periode" asc;'
     ) 
 
     result = db_client.execute_sql(query)
 
-    df = pd.DataFrame(result, columns=["Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct. "])
-    df["Status 3 mdr. efter afsluttet forløb, pct. "] = pd.to_numeric(df["Status 3 mdr. efter afsluttet forløb, pct. "], errors='coerce')
+    df = pd.DataFrame(result, columns=["Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct."])
+    df["Status 3 mdr. efter afsluttet forløb, pct."] = pd.to_numeric(df["Status 3 mdr. efter afsluttet forløb, pct."], errors='coerce')
     df["Periode"] = df["Periode"].str.replace('QMAT0', '-K')
     df["År"] = df["Periode"].str[:4].astype(int)
     df = df[df["År"] >= today.year - 4]
@@ -95,7 +94,7 @@ def cju_page():
             fig, ax = plt.subplots(figsize=(8, 4))
             colors = {'Lønmodtagerbeskæftigelse': '#00B050', 'Uddannelse': '#FFC000', 'Fleksjob': '#FF0000', 'Selvforsørgelse': '#00B0F0'}
             for Arbejdsmarkedsstatus, group in df.groupby("Arbejdsmarkedsstatus"):
-                ax.plot(group['Periode'], group['Status 3 mdr. efter afsluttet forløb, pct. '], label=Arbejdsmarkedsstatus, color=colors.get(Arbejdsmarkedsstatus, 'black'))
+                ax.plot(group['Periode'], group['Status 3 mdr. efter afsluttet forløb, pct.'], label=Arbejdsmarkedsstatus, color=colors.get(Arbejdsmarkedsstatus, 'black'))
             ax.set_xlabel('Tid')
             ax.set_ylabel('Procent')
             ax.set_title('Aktivitetsparate kontanthjælpsmodtagere: Status 3 mdr. efter afsluttet forløb, pct.')
