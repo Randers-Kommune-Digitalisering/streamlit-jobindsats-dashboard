@@ -63,8 +63,8 @@ def get_ydelser_overview():
                 query = (
                     f'SELECT "{periode_col}", "Område", '
                     '"Antal personer", "Antal fuldtidspersoner", '
-                    '"Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år", '
-                    '"Fuldtidspersoner i pct. af befolkningen 16-66 år" '
+                    '"Fuldtidspersoner i pct. af arbejdsstyrken", '
+                    '"Fuldtidspersoner i pct. af befolkningen" '
                     f'FROM {table}'
                 )
                 columns = [
@@ -72,8 +72,8 @@ def get_ydelser_overview():
                     "Område",
                     "Antal personer",
                     "Antal fuldtidspersoner",
-                    "Fuldtidspersoner i pct. af arbejdsstyrken 16-66 år",
-                    "Fuldtidspersoner i pct. af befolkningen 16-66 år"
+                    "Fuldtidspersoner i pct. af arbejdsstyrken",
+                    "Fuldtidspersoner i pct. af befolkningen"
                 ]
                 result = db_client.execute_sql(query)
                 if result is not None:
