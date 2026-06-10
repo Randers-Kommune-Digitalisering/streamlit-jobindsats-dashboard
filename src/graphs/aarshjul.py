@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import datetime as dt
 from utils.database_connection import get_jobindsats_db
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 import matplotlib.dates as mdates
@@ -32,6 +33,26 @@ def month_year_da(x, pos):
     dt = mdates.num2date(x)
     return f"{MONTHS_DA.get(dt.month, '')} {dt.year}"
 
+def format_date_ddmmyyyy(value):
+    parsed = pd.to_datetime(value, errors='coerce')
+    if pd.isna(parsed):
+        return str(value)
+    return parsed.strftime('%d-%m-%Y')
+
+def LastUpdate(table_id):
+    query = 'SELECT "LatestUpdate" FROM jobindsats_table_updates WHERE "TableID" = %s;'
+    result = db_client.execute_sql(query, (table_id,))
+    if not result:
+        return "Ukendt"
+    return format_date_ddmmyyyy(result[0][0])
+
+def NextUpdate(table_id):
+    query = 'SELECT "NextUpdate" FROM jobindsats_table_updates WHERE "TableID" = %s;'
+    result = db_client.execute_sql(query, (table_id,))
+    if not result:
+        return "Ukendt"
+    return format_date_ddmmyyyy(result[0][0])
+
 def render_vector_downloads(fig, filename_prefix):
     svg_buffer = BytesIO()
     fig.savefig(svg_buffer, format='svg', bbox_inches='tight')
@@ -60,7 +81,7 @@ def aarshjul():
     result = db_client.execute_sql(query)
 
     df = pd.DataFrame(result, columns=["Periode", "Område", "Periode A-Dagpenge", "Antal fuldtidspersoner"])
-    
+
     df["år"] = df["Periode A-Dagpenge"].dt.year
     df["måned"] = df["Periode A-Dagpenge"].dt.month
 
@@ -71,7 +92,7 @@ def aarshjul():
         st.subheader("A-dagpenge")
         col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
         with col1:
-            st.markdown("""
+            st.markdown(f"""
                 #### Noter
                 Udvikling i antal helårspersoner seneste tre år. Budgetpersoner for indeværende år er markeret med stiplet linje.
 
@@ -79,6 +100,8 @@ def aarshjul():
                 Jobindsats.dk
 
                     y01a02
+                     - Sidst opdateret:  {LastUpdate('y01a02')}
+                     - Næste opdatering: {NextUpdate('y01a02')}
                         
             """)
             
@@ -146,14 +169,16 @@ def aarshjul():
         col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")       
 
         with col1:
-            st.markdown("""
+            st.markdown(f"""
                 #### Noter
-                Ledighedsandel for A-dagpengemodtagere i Randers i forhold til hele landet seneste to år.
+                Ledighedsandel i Randers i forhold til hele landet seneste to år.
 
                 #### Kilde
                 Jobindsats.dk
 
-                    y25i01 
+                    y25i01
+                     - Sidst opdateret:  {LastUpdate('y25i01')}
+                     - Næste opdatering: {NextUpdate('y25i01')}
                         
                 #### Befolkningsandel
             """)
