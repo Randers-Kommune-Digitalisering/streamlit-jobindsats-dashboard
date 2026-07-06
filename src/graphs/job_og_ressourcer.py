@@ -250,3 +250,5 @@ def show_job_og_ressourcer_graph():
     except Exception as e:
         st.exception(e)
         return
+    finally:
+        db_client.close_connection()
