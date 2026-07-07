@@ -153,3 +153,5 @@ def show_job_og_sundhed_graph():
     except Exception as e:
         st.error(f"Fejl: {e}")
         return
+    finally:
+        db_client.close_connection()
