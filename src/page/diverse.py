@@ -8,7 +8,8 @@ db_client = get_jobindsats_db()
 
 
 def get_politisk_betjening_overview():
-    st.title("Diverse statistikker")
+    try:
+        st.title("Diverse statistikker")
 
     with st.sidebar:
         st.markdown("## Diverse statistikker")
