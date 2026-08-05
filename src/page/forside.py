@@ -13,9 +13,8 @@ def show_forside():
         | Menupunkt         | Beskrivelse
         |---------------------------|-------------------------------------|
         | ***JobRanders***     | Måltal for centre og afdelinger i JobRanders (under udvikling) | 
-        | ***Politisk betjening***    | Diverse grafer og datatræk til løbende politisk betjening (under udvikling) |
-        | ***Fremtidens Randers***    | Diverse grafer i relation til Fremtidens Randers (under udvikling) |
         | ***Ydelser***          | Udvikling i enkeltydelser over tid (under udvikling) |
+        | ***Diverse statistikker***    | Diverse løbende grafer og statistikker |
         | ***Datakatalog***                | Katalog over tilgængelige data fra api.jobindsats.dk  | 
         | ***Om***          | Om denne side |
     """)
