@@ -11,26 +11,29 @@ def get_politisk_betjening_overview():
     try:
         st.title("Diverse statistikker")
 
-    with st.sidebar:
-        st.markdown("## Diverse statistikker")
+        with st.sidebar:
+            st.markdown("## Diverse statistikker")
 
-        samling = sac.tree(
-            items=[
-                sac.TreeItem("Årshjulsdokumenter"),
-                sac.TreeItem("Arbejdspligt")
-            ],
-            index=0,
-            size="lg",
-            open_all=False,
-            checkbox=False,
-            show_line=False,
-            icon=None,
-            color='#4a4a4a'
-        )
+            samling = sac.tree(
+                items=[
+                    sac.TreeItem("Årshjulsdokumenter"),
+                    sac.TreeItem("Arbejdspligt")
+                ],
+                index=0,
+                size="lg",
+                open_all=False,
+                checkbox=False,
+                show_line=False,
+                icon=None,
+                color='#4a4a4a'
+            )
 
-    if samling is None:
-        st.subheader("Vælg en underside i menuen til venstre")
-    elif samling == "Årshjulsdokumenter":
-            aarshjul()
-    elif samling == "Arbejdspligt":
-            arbejdspligt()
+        if samling is None:
+            st.subheader("Vælg en underside i menuen til venstre")
+        elif samling == "Årshjulsdokumenter":
+                aarshjul()
+        elif samling == "Arbejdspligt":
+                arbejdspligt()
+
+    except Exception as e:
+        st.error(f'Fejl ved loading: {e}')
