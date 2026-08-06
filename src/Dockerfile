@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # Set dir and user
 ENV GROUP_NAME=src
@@ -12,7 +12,7 @@ RUN if ! getent group src; then addgroup --gid 11000 src; fi && \
     adduser $USER_ID -u USER_ID -D -G src -h /src
 
 # Install packages
-RUN apt-get update && apt-get install --yes --no-install-recommends build-essential libmariadb-dev libpq-dev
+# RUN apt-get update && apt-get install --yes --no-install-recommends build-essential libmariadb-dev libpq-dev
 
 # Copy files and set working dir
 COPY . $HOME
@@ -22,7 +22,7 @@ WORKDIR $HOME
 RUN chown -R $USER_ID:$GROUP_ID /src && chmod -R 775 /src
 
 # Install python packages
-RUN pip install --upgrade pip setuptools wheel
+# RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 
 # Open port
