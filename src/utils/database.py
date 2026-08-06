@@ -1,6 +1,4 @@
-import pymysql
 import logging
-import pymssql
 import psycopg2
 
 
@@ -21,11 +19,7 @@ class DatabaseClient:
         try:
             if self.connection is None or self.connection.closed:
                 self.logger.info(f"Attempting to connect to {self.db_type} database: {self.database} at {self.host}:{self.port}")
-                if self.db_type == 'mssql':
-                    self.connection = pymssql.connect(host=self.host, user=self.username, password=self.password, database=self.database, port=self.port)
-                elif self.db_type == 'mysql':
-                    self.connection = pymysql.connect(host=self.host, user=self.username, password=self.password, database=self.database, port=self.port)
-                elif self.db_type == 'postgresql':
+                if self.db_type == 'postgresql':
                     self.connection = psycopg2.connect(host=self.host, user=self.username, password=self.password, dbname=self.database, port=self.port)
                 else:
                     raise ValueError(f"Unsupported database type: {self.db_type}")
