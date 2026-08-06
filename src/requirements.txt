@@ -2,7 +2,7 @@ pandas==3.0.5
 python-dotenv==1.2.2
 SQLAlchemy==2.0.51
 streamlit==1.61.1
-streamlit_option_menuu==0.4.0
+streamlit_option_menu==0.4.0
 streamlit-antd-components==0.3.2
 xlsxwriter==3.2.9
 plotly==6.9.0
