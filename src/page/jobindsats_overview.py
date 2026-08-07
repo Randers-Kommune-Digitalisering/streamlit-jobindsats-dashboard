@@ -6,7 +6,7 @@ db_client = get_jobindsats_db()
 
 
 def show_jobindsats_metadata_overview():
-    st.title("Jobindsats Metadata Overblik")
+    st.title("Datakatalog")
     st.markdown("Her vises seneste og kommende opdateringer for Jobindsats tabeller.")
 
     try:

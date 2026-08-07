@@ -70,8 +70,7 @@ def render_vector_downloads(fig, filename_prefix):
 
 def aarshjul():
     try:
-        st.header("Ressourcer til årshjulsdokumenter")
-        st.subheader("Budgetopfølgninger")
+        st.header("Budgetopfølgning")
         today = pd.to_datetime("today")
 
         # Helårspersoner - A-dagpenge
@@ -255,7 +254,10 @@ def aarshjul():
         
                 render_vector_downloads(fig, f"ledighedsandel-{today.year}")
     except Exception as e:
-        st.exception(e)
+        st.error(f"""Fejl: Kan ikke hente data
+        
+        {e}
+        """)
         return
     finally:
         db_client.close_connection()

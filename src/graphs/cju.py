@@ -4,7 +4,6 @@ from utils.database_connection import get_jobindsats_db
 from matplotlib.ticker import FuncFormatter
 import matplotlib.pyplot as plt
 
-
 db_client = get_jobindsats_db()
 
 def percent_comma(x, pos):
@@ -111,7 +110,10 @@ def cju_page():
                     st.pyplot(fig, use_container_width=False)
 
         except Exception as e:
-            st.exception(e)
+            st.error(f"""Fejl: Kan ikke hente data
+            
+            {e}
+            """)
             return
         finally:
             db_client.close_connection()

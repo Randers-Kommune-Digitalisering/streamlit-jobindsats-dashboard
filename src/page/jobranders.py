@@ -10,35 +10,11 @@ import streamlit_antd_components as sac
 
 db_client = get_jobindsats_db()
 
+def get_jobranders(afdeling):
 
-def get_jobcenter_randers_overview():
-    with st.sidebar:
-        st.markdown("## JobRanders")
-
-        afdeling = sac.tree(
-            items=[
-                sac.TreeItem("Center for Job og Udvikling", children=[
-                    sac.TreeItem("Job og løntimer"),
-                    sac.TreeItem("Job og ressourcer"),
-                    sac.TreeItem("Job og sundhed")
-                ]),
-                sac.TreeItem("Center for Job og Kompetencer")
-
-            ],
-            index=0,
-            size="lg",
-            open_all=False,
-            checkbox=False,
-            show_line=False,
-            icon=None,
-            color='#4a4a4a'
-        )
-
-    st.title("JobRanders")
     if afdeling is None:
         st.subheader("Vælg en afdeling i venstre side")
     else:
-        st.subheader(afdeling)
         if afdeling == "Center for Job og Udvikling":
             cju_page()
         if afdeling == "Center for Job og Kompetencer":
