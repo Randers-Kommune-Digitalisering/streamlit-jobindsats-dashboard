@@ -18,8 +18,18 @@ with st.sidebar:
     selected = sac.menu([
         sac.MenuItem('Forside', icon='house'),
         sac.MenuItem('JobRanders', icon='buildings', children=[
-            sac.MenuItem('Center for Job og Kompetencer', icon='building'),
-            sac.MenuItem('Center for Job og Udvikling', icon='building'),
+            sac.MenuItem('Center for Job og Kompetencer', icon='building', children=[
+                sac.MenuItem('CJK - fælles mål', icon='bullseye'),
+                sac.MenuItem('A-dagpenge og jobformidling', icon='house-door'),
+                sac.MenuItem('Jobparate og integration', icon='house-door'),
+                sac.MenuItem('Fleksjob', icon='house-door'),
+                sac.MenuItem('Sprogcenter', icon='house-door'),
+            ]),
+            sac.MenuItem('Center for Job og Udvikling', icon='building', children=[
+                sac.MenuItem('CJU - fælles mål', icon='bullseye'),
+                sac.MenuItem('Sygedagpenge', icon='house-door'),
+                sac.MenuItem('Kontanthjælp voksne', icon='house-door')
+            ]),
         ]),
         sac.MenuItem('Ydelser', icon='people'),
         sac.MenuItem('Diverse statistikker', icon='graph-down-arrow', children=[
