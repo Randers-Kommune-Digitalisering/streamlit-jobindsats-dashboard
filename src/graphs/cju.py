@@ -90,7 +90,7 @@ def cju_page(afdeling):
                 with col2:
 
                     query = (
-                        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct." FROM jobindsats_y60b15 where "Område" IN (\'Randers\') and "Visitationskategori" in (\'Aktivitetsparat\') order by "Periode" asc;'
+                        'SELECT "Område", "Periode", "Arbejdsmarkedsstatus", "Status 3 mdr. efter afsluttet forløb, pct." FROM jobindsats_y60b15 where "Område" IN (\'Randers\') order by "Periode" asc;'
                     ) 
 
                     result = db_client.execute_sql(query)
@@ -144,7 +144,20 @@ def cju_page(afdeling):
                     """)
 
                 with col2:
-                    st.warning("Under udarbejdelse")
+                    query = (
+                        'SELECT "Område", "Periode", "Gnsn. varighed, afsluttede aktiveringsforløb, uger", "Periode Aktivitetsparate kontanthjælpsmodtagere varighed af af" FROM jobindsats_y60c06 order by "Periode" asc;'
+                    ) 
+
+                    result = db_client.execute_sql(query)
+
+                    if not result: 
+                        st.warning("Data ikke tilgængelige")
+                    else:
+
+                        df = pd.DataFrame(result, columns=["Område", "Periode", "Gnsn. varighed, afsluttede aktiveringsforløb, uger", "Periode (timestamp)"])
+
+                        df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"] = pd.to_numeric(df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"], errors='coerce')
+                        st.write(df)
 
         except Exception as e:
             st.error(f"""{e}
