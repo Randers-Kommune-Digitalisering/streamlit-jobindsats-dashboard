@@ -42,7 +42,7 @@ with st.sidebar:
 
 if selected == "Forside":
     show_forside()
-elif selected in ["Center for Job og Kompetencer", "Center for Job og Udvikling", "JobRanders"]:
+elif selected in ["CJK - fælles mål", "CJU - fælles mål", "Center for Job og Kompetencer", "Center for Job og Udvikling", "JobRanders"]:
     get_jobranders(selected)
 elif selected == "Ydelser":
     get_ydelser_overview()

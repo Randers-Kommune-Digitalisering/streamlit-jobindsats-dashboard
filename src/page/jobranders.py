@@ -15,10 +15,10 @@ def get_jobranders(afdeling):
     if afdeling is None:
         st.subheader("Vælg en afdeling i venstre side")
     else:
-        if afdeling == "Center for Job og Udvikling":
-            cju_page()
-        if afdeling == "Center for Job og Kompetencer":
-            cjk_page()
+        if afdeling in ["Center for Job og Udvikling", "CJU - fælles mål"]:
+            cju_page(afdeling)
+        if afdeling == "CJK - fælles mål":
+            cjk_page(afdeling)
         if afdeling == "Job og ressourcer":
             show_job_og_ressourcer_graph()
 
