@@ -151,7 +151,7 @@ def aarshjul():
 
                 # Helårspersoner - A-dagpenge
                 query = (
-                    'SELECT "Periode", "Område", "Periode Ledighed: Faktiske antal ledige og fuldtidspersoner", "Antal ledige fuldtidspersoner" FROM jobindsats_y25i01 where "Område" IN (\'Randers\', \'Hele landet\') order by "Periode" asc;'
+                    'SELECT "Periode", "Område", "Periode Ledighed: Faktiske antal ledige og fuldtidspersoner", "Antal ledige fuldtidspersoner" FROM jobindsats_y25i01 where "Område" IN (\'Randers\', \'Hele landet\') and "Alder" = \'Alder i alt\' and "Ydelsesgrupper" = \'Ydelsesgrupper i alt\' order by "Periode" asc;'
                 ) 
 
                 result = db_client.execute_sql(query)
@@ -168,6 +168,7 @@ def aarshjul():
                     df2 = df[df["år"] >= today.year - 1]
 
                     # Unstack data to have separate columns for Randers and Hele landet
+
                     df2 = df2.pivot(index="Periode Ledighed: Faktiske antal ledige og fuldtidspersoner", columns="Område", values="Antal ledige fuldtidspersoner")
 
                     df2["Ledighedsandel"] = df2["Randers"] / df2["Hele landet"] * 100
