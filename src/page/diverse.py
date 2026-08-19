@@ -7,27 +7,8 @@ from graphs.arbejdspligt import arbejdspligt
 db_client = get_jobindsats_db()
 
 
-def get_politisk_betjening_overview():
+def get_diverse(samling):
     try:
-        st.title("Diverse statistikker")
-
-        with st.sidebar:
-            st.markdown("## Diverse statistikker")
-
-            samling = sac.tree(
-                items=[
-                    sac.TreeItem("Årshjulsdokumenter"),
-                    sac.TreeItem("Arbejdspligt")
-                ],
-                index=0,
-                size="lg",
-                open_all=False,
-                checkbox=False,
-                show_line=False,
-                icon=None,
-                color='#4a4a4a'
-            )
-
         if samling is None:
             st.subheader("Vælg en underside i menuen til venstre")
         elif samling == "Årshjulsdokumenter":

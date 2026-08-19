@@ -3,7 +3,7 @@ import streamlit as st
 
 def show_forside():
     st.title("Forside")
-    st.markdown("## Velkommen til Randers Kommunes jobindsats-dashboardet")
+    st.markdown("## Velkommen til Randers Kommunes jobindsats-dashboard")
     st.markdown("Formålet med dashboardet er at give et overblik over jobindsatsen i Randers Kommune og gøre det nemt for medarbejdere, ledere og beslutningstagere at få indsigt i relevante data.")
     st.markdown("Dashboardet er opdelt i flere sektioner, som hver især fokuserer på forskellige aspekter af jobindsatsen. I menuen til venstre kan du navigere mellem de forskellige sektioner og udforske de data og grafer, der er tilgængelige.")
     st.markdown("Data trækkes fra [api.jobindsats.dk](https://api.jobindsats.dk/) og opdateres ugentlig.")
