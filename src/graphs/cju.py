@@ -10,6 +10,10 @@ db_client = get_jobindsats_db()
 def percent_comma(x, pos):
     return f"{x:,.1f}%".replace('.', ',')
 
+def date_parser(df, date_column):
+    df[date_column] = pd.to_datetime(df[date_column].str.replace('M', '-'), format='%Y-%m')
+    return df
+
 def cju_page(afdeling):
     if afdeling == "CJU - fælles mål":
         try:
@@ -156,8 +160,28 @@ def cju_page(afdeling):
 
                         df = pd.DataFrame(result, columns=["Område", "Periode", "Gnsn. varighed, afsluttede aktiveringsforløb, uger", "Periode (timestamp)"])
 
-                        df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"] = pd.to_numeric(df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"], errors='coerce')
-                        st.write(df)
+                        df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"] = pd.to_numeric(df["Gnsn. varighed, afsluttede aktiveringsforløb, uger"], errors='coerce') 
+
+                        df = date_parser(df, "Periode")    
+
+
+                        fig, ax = plt.subplots(figsize=(8, 4))
+                        colors = {'Randers': '#00B050', 'Hele landet': '#FFC000'}
+                        for Område, group in df.groupby("Område"):
+                            ax.plot(group['Periode'], group['Gnsn. varighed, afsluttede aktiveringsforløb, uger'], label=Område, color=colors.get(Område, 'black'))
+                        ax.set_xlabel('Tid')
+                        ax.set_ylabel('Uger')
+                        ax.set_title('Aktivitetsparate kontanthjælpsmodtagere: Varighed af afsluttede aktiveringsforløb')
+                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                        # ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                        ax.spines['top'].set_visible(False)
+                        ax.spines['right'].set_visible(False)
+                        handles, labels = ax.get_legend_handles_labels()
+                        sorted_handles_labels = sorted(zip(handles, labels), key=lambda x: 0 if x[1] == "Randers" else 1)
+                        handles, labels = zip(*sorted_handles_labels)
+                        ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                        fig.autofmt_xdate()
+                        st.pyplot(fig, use_container_width=False)
 
         except Exception as e:
             st.error(f"""{e}
