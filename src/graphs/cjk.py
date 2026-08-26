@@ -3,6 +3,7 @@ import pandas as pd
 from utils.database_connection import get_jobindsats_db
 from matplotlib.ticker import FuncFormatter
 import matplotlib.pyplot as plt
+from utils.func import LastUpdate, NextUpdate, ComparisonGroupDropdown, render_vector_downloads, render_vector_downloads_nocol
 
 db_client = get_jobindsats_db()
 
@@ -17,70 +18,22 @@ def thousands_dot(x, pos):
     return f"{int(x):,}".replace(",", ".")
 
 def cjk_page(afdeling):
+
+    comparison_groups = {
+        "Hele landet": ["Randers", "Hele landet"],
+        "Østjylland": ["Randers", "Aarhus", "Favrskov", "Horsens", "Norddjurs", "Odder", "Samsø", "Skanderborg", "Syddjurs"]
+    }
+
     if afdeling == "CJK - fælles mål":
         try:
             st.header("Overordnede mål")
             today = pd.to_datetime("today")
 
-            # Mål 1.a og 1.b
-            query = (
-                'SELECT "Område", "Periode", "Antal ledige personer", "Alder", "Ydelsesgrupper", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år" FROM jobindsats_y25i01 where "Område" IN (\'Randers\', \'Aarhus\', \'Favrskov\', \'Horsens\', \'Norddjurs\', \'Odder\', \'Samsø\',  \'Skanderborg\',  \'Syddjurs\') order by "Periode" desc;'
-            )
-
-            result = db_client.execute_sql(query)
-
-            df = pd.DataFrame(result, columns=["Område", "Periode", "Antal ledige personer", "Alder", "Ydelsesgrupper", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"])
-
-            # with st.container(border=1):
-            #     st.subheader("1.a - Sæsonkorrigeret ledighedsudvikling i pct. af arbejdsstyrken 16-66 år")
-            #     col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
-            #     with col1:
-            #         st.markdown("""
-            #             #### Mål
-            #             ...
-
-            #             #### Noter
-            #             Østjylland: Aarhus, Favrskov, Horsens, Norddjurs, Odder, Samsø, Skanderborg og Syddjurs
-
-            #             #### Kilde
-            #             Jobindsats.dk
-
-            #                 y25i01
-            #         """)
-            #     with col2:
-            #         chart_df = df[["Område", "Periode", "Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"]]
-            #         chart_df["Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"] = pd.to_numeric(chart_df["Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år"], errors='coerce')
-
-            #         date_parser(chart_df, "Periode")
-
-            #         chart_df["År"] = chart_df["Periode"].dt.year
-            #         chart_df["Måned"] = chart_df["Periode"].dt.month
-
-            #         chart_df = chart_df[chart_df["År"] >= today.year - 2 ]
-
-            #         chart_df["Område_split"] = chart_df["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
-            #         grouped_df = chart_df.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år'].mean().reset_index()
-
-            #         fig, ax = plt.subplots(figsize=(8, 4))
-            #         colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-            #         for område, group in grouped_df.groupby("Område_split"):
-            #             ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af arbejdsstyrken 16-66 år'], label=område, color=colors.get(område, 'black'))
-            #         ax.set_xlabel('Tid')
-            #         ax.set_ylabel('Procent')
-            #         ax.set_title('Sæsonkorrigeret ledighed i procent af arbejdsstyrken 16-66 år')
-            #         ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-            #         ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-            #         ax.spines['top'].set_visible(False)
-            #         ax.spines['right'].set_visible(False)
-            #         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-            #         fig.autofmt_xdate()
-            #         st.pyplot(fig, use_container_width=False)
-
             with st.container(border=1):
                 st.subheader("1 - Ledighedsudvikling i pct. af befolkningen 16-66 år")
                 col1, col2 = st.columns([2, 5], vertical_alignment="top", gap="large")
                 with col1:
-                    st.markdown("""
+                    st.markdown(f"""
                         #### Mål
                         ...
 
@@ -91,153 +44,174 @@ def cjk_page(afdeling):
                         Jobindsats.dk
 
                             y25i01
+                            - Sidst opdateret:  {LastUpdate('y25i01')}
+                            - Næste opdatering: {NextUpdate('y25i01')}
+
+                        #### Vælg sammenligningsgruppe
                     """)
+                    ComparisonGroup, ComparisonKey = ComparisonGroupDropdown("Vælg sammenligningsgruppe", comparison_groups, key="comparison_group", default=1, visible=False)
+
+
                 with col2:
-                    col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
-                    with col21:
-                        # Select where Alder="Alder i alt", ydelsegrupper="I alt" and Område in Randers, Østjylland
-                        chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "Ydelsesgrupper i alt")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
-                        chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
+                    # Mål 1
+                    query = (
+                        'SELECT "Område", "Periode", "Antal ledige personer", "Alder", "Ydelsesgrupper", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år" FROM jobindsats_y25i01 where "Område" = ANY(%s) order by "Periode" desc;'
+                    )
 
-                        date_parser(chart_df1, "Periode")
+                    result = db_client.execute_sql(query, (ComparisonGroup,))
 
-                        chart_df1["År"] = chart_df1["Periode"].dt.year
-                        chart_df1["Måned"] = chart_df1["Periode"].dt.month
+                    if not result:
+                        st.warning("Data ikke tilgængelige")
+                    else:
 
-                        chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
+                        df = pd.DataFrame(result, columns=["Område", "Periode", "Antal ledige personer", "Alder", "Ydelsesgrupper", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"])
 
-                        chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
-                        grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
+                        col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
+                        with col21:
+                            # Select where Alder="Alder i alt", ydelsegrupper="I alt" and Område in Randers, Østjylland
+                            chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "Ydelsesgrupper i alt")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
+                            chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
 
-                        # Pyplot chart for the same data
-                        fig, ax = plt.subplots(figsize=(8, 4))
-                        colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-                        for område, group in grouped_df1.groupby("Område_split"):
-                            ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
-                        ax.set_xlabel('Tid')
-                        ax.set_ylabel('Procent af befolkningen 16-66 år')
-                        ax.set_title('Ledige fuldtidspersoner')
-                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-                        ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-                        ax.spines['top'].set_visible(False)
-                        ax.spines['right'].set_visible(False)
-                        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-                        fig.autofmt_xdate()
-                        st.pyplot(fig, use_container_width=False)
+                            date_parser(chart_df1, "Periode")
 
-                    with col22:
+                            chart_df1["År"] = chart_df1["Periode"].dt.year
+                            chart_df1["Måned"] = chart_df1["Periode"].dt.month
 
-                        # Difference Randers vs Østjylland
-                        grouped_df1_pivot = grouped_df1.pivot(index='Periode', columns='Område_split', values='Ledige fuldtidspersoner i pct. af befolkningen 16-66 år').reset_index()
-                        grouped_df1_pivot['Difference'] = grouped_df1_pivot['Randers'] - grouped_df1_pivot['Østjylland']
-                        fig, ax = plt.subplots(figsize=(8, 4))
+                            chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
 
-                        colors = {'Difference: Randers - Østjylland': '#00B0F0'}
-                        ax.plot(grouped_df1_pivot['Periode'], grouped_df1_pivot['Difference'], label='Difference: Randers - Østjylland', color=colors.get('Difference: Randers - Østjylland', 'black'))
-                        ax.set_xlabel('Tid')
-                        ax.set_ylabel('Procent af befolkningen 16-66 år')
-                        ax.set_title('Ledige fuldtidspersoner: Difference Randers vs Østjylland')
-                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-                        ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-                        ax.spines['top'].set_visible(False)
-                        ax.spines['right'].set_visible(False)
-                        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-                        fig.autofmt_xdate()
-                        st.pyplot(fig, use_container_width=False)
+                            chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else ComparisonKey)
+                            grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
 
+                            # Pyplot chart for the same data
+                            fig, ax = plt.subplots(figsize=(8, 4))
+                            colors = {'Randers': '#00B050', ComparisonKey: '#FFC000'}
+                            for område, group in grouped_df1.groupby("Område_split"):
+                                ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
+                            ax.set_xlabel('Tid')
+                            ax.set_ylabel('Procent af befolkningen 16-66 år')
+                            ax.set_title('Ledige fuldtidspersoner')
+                            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                            ax.spines['top'].set_visible(False)
+                            ax.spines['right'].set_visible(False)
+                            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                            fig.autofmt_xdate()
+                            st.pyplot(fig, use_container_width=False)
+                            render_vector_downloads_nocol(fig, f"Ledighedsudvikling  1.1")
 
-                    col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
-                    with col21:
-                        chart_df1 = df[(df["Alder"] != "Alder i alt") & (df["Ydelsesgrupper"] == "Ydelsesgrupper i alt")][["Område", "Periode", "Alder", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
-                        chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
+                        with col22:
 
-                        date_parser(chart_df1, "Periode")
+                            # Difference Randers vs Østjylland
+                            grouped_df1_pivot = grouped_df1.pivot(index='Periode', columns='Område_split', values='Ledige fuldtidspersoner i pct. af befolkningen 16-66 år').reset_index()
+                            grouped_df1_pivot['Difference'] = grouped_df1_pivot['Randers'] - grouped_df1_pivot[ComparisonKey]
+                            fig, ax = plt.subplots(figsize=(8, 4))
 
-                        chart_df1["År"] = chart_df1["Periode"].dt.year
-                        chart_df1["Måned"] = chart_df1["Periode"].dt.month
-
-                        chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
-
-                        chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
-                        grouped_df1 = chart_df1.groupby(['Periode', 'Alder', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
-
-                        grouped_df1 = grouped_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].sum().reset_index()
-
-                        fig, ax = plt.subplots(figsize=(8, 4))
-                        colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-                        for område, group in grouped_df1.groupby("Område_split"):
-                            ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
-                        ax.set_xlabel('Tid')
-                        ax.set_ylabel('Procent af befolkningen 16-66 år')
-                        ax.set_title('Ledige fuldtidspersoner: Unge 16-29 år')
-                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-                        ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-                        ax.spines['top'].set_visible(False)
-                        ax.spines['right'].set_visible(False)
-                        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-                        fig.autofmt_xdate()
-                        st.pyplot(fig, use_container_width=False)
-
-                    with col22:
-                        chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "A-dagpenge")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
-                        chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
-
-                        date_parser(chart_df1, "Periode")
-
-                        chart_df1["År"] = chart_df1["Periode"].dt.year
-                        chart_df1["Måned"] = chart_df1["Periode"].dt.month
-
-                        chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
-
-                        chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
-                        grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
+                            colors = {f'Difference: Randers - {ComparisonKey}': '#00B0F0'}
+                            ax.plot(grouped_df1_pivot['Periode'], grouped_df1_pivot['Difference'], label=f'Difference: Randers - {ComparisonKey}', color=colors.get(f'Difference: Randers - {ComparisonKey}', 'black'))
+                            ax.set_xlabel('Tid')
+                            ax.set_ylabel('Procent af befolkningen 16-66 år')
+                            ax.set_title('Ledige fuldtidspersoner: Difference Randers vs Østjylland')
+                            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                            ax.spines['top'].set_visible(False)
+                            ax.spines['right'].set_visible(False)
+                            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                            fig.autofmt_xdate()
+                            st.pyplot(fig, use_container_width=False)
 
 
-                        fig, ax = plt.subplots(figsize=(8, 4))
-                        colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-                        for område, group in grouped_df1.groupby("Område_split"):
-                            ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
-                        ax.set_xlabel('Tid')
-                        ax.set_ylabel('Procent af befolkningen 16-66 år')
-                        ax.set_title('Ledige fuldtidspersoner: A-dagpenge')
-                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-                        ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-                        ax.spines['top'].set_visible(False)
-                        ax.spines['right'].set_visible(False)
-                        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-                        fig.autofmt_xdate()
-                        st.pyplot(fig, use_container_width=False)
+                        col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
+                        with col21:
+                            chart_df1 = df[(df["Alder"] != "Alder i alt") & (df["Ydelsesgrupper"] == "Ydelsesgrupper i alt")][["Område", "Periode", "Alder", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
+                            chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
 
-                    col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
-                    with col21:
-                        chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "Kontanthjælp")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
-                        chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
+                            date_parser(chart_df1, "Periode")
 
-                        date_parser(chart_df1, "Periode")
+                            chart_df1["År"] = chart_df1["Periode"].dt.year
+                            chart_df1["Måned"] = chart_df1["Periode"].dt.month
 
-                        chart_df1["År"] = chart_df1["Periode"].dt.year
-                        chart_df1["Måned"] = chart_df1["Periode"].dt.month
+                            chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
 
-                        chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
+                            chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else ComparisonKey)
+                            grouped_df1 = chart_df1.groupby(['Periode', 'Alder', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
 
-                        chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else "Østjylland")
-                        grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
+                            grouped_df1 = grouped_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].sum().reset_index()
+
+                            fig, ax = plt.subplots(figsize=(8, 4))
+                            colors = {'Randers': '#00B050', ComparisonKey: '#FFC000'}
+                            for område, group in grouped_df1.groupby("Område_split"):
+                                ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
+                            ax.set_xlabel('Tid')
+                            ax.set_ylabel('Procent af befolkningen 16-66 år')
+                            ax.set_title('Ledige fuldtidspersoner: Unge 16-29 år')
+                            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                            ax.spines['top'].set_visible(False)
+                            ax.spines['right'].set_visible(False)
+                            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                            fig.autofmt_xdate()
+                            st.pyplot(fig, use_container_width=False)
+
+                        with col22:
+                            chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "A-dagpenge")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
+                            chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
+
+                            date_parser(chart_df1, "Periode")
+
+                            chart_df1["År"] = chart_df1["Periode"].dt.year
+                            chart_df1["Måned"] = chart_df1["Periode"].dt.month
+
+                            chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
+
+                            chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else ComparisonKey)
+                            grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
 
 
-                        fig, ax = plt.subplots(figsize=(8, 4))
-                        colors = {'Randers': '#00B050', 'Østjylland': '#FFC000'}
-                        for område, group in grouped_df1.groupby("Område_split"):
-                            ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
-                        ax.set_xlabel('Tid')
-                        ax.set_ylabel('Procent af befolkningen 16-66 år')
-                        ax.set_title('Ledige fuldtidspersoner: Kontanthjælp')
-                        ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
-                        ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
-                        ax.spines['top'].set_visible(False)
-                        ax.spines['right'].set_visible(False)
-                        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
-                        fig.autofmt_xdate()
-                        st.pyplot(fig, use_container_width=False)
+                            fig, ax = plt.subplots(figsize=(8, 4))
+                            colors = {'Randers': '#00B050', ComparisonKey: '#FFC000'}
+                            for område, group in grouped_df1.groupby("Område_split"):
+                                ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
+                            ax.set_xlabel('Tid')
+                            ax.set_ylabel('Procent af befolkningen 16-66 år')
+                            ax.set_title('Ledige fuldtidspersoner: A-dagpenge')
+                            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                            ax.spines['top'].set_visible(False)
+                            ax.spines['right'].set_visible(False)
+                            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                            fig.autofmt_xdate()
+                            st.pyplot(fig, use_container_width=False)
+
+                        col21, col22 = st.columns([1, 1], vertical_alignment="top", gap="small")
+                        with col21:
+                            chart_df1 = df[(df["Alder"] == "Alder i alt") & (df["Ydelsesgrupper"] == "Kontanthjælp")][["Område", "Periode", "Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"]]
+                            chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"] = pd.to_numeric(chart_df1["Ledige fuldtidspersoner i pct. af befolkningen 16-66 år"], errors='coerce')
+
+                            date_parser(chart_df1, "Periode")
+
+                            chart_df1["År"] = chart_df1["Periode"].dt.year
+                            chart_df1["Måned"] = chart_df1["Periode"].dt.month
+
+                            chart_df1 = chart_df1[chart_df1["År"] >= today.year - 2 ]
+
+                            chart_df1["Område_split"] = chart_df1["Område"].apply(lambda x: "Randers" if x == "Randers" else ComparisonKey)
+                            grouped_df1 = chart_df1.groupby(['Periode', 'Område_split'])['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'].mean().reset_index()
+
+
+                            fig, ax = plt.subplots(figsize=(8, 4))
+                            colors = {'Randers': '#00B050', ComparisonKey: '#FFC000'}
+                            for område, group in grouped_df1.groupby("Område_split"):
+                                ax.plot(group['Periode'], group['Ledige fuldtidspersoner i pct. af befolkningen 16-66 år'], label=område, color=colors.get(område, 'black'))
+                            ax.set_xlabel('Tid')
+                            ax.set_ylabel('Procent af befolkningen 16-66 år')
+                            ax.set_title('Ledige fuldtidspersoner: Kontanthjælp')
+                            ax.grid(axis='y', color='gray', linestyle='-', linewidth=0.5, alpha=0.2)
+                            ax.yaxis.set_major_formatter(FuncFormatter(percent_comma))
+                            ax.spines['top'].set_visible(False)
+                            ax.spines['right'].set_visible(False)
+                            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False)
+                            fig.autofmt_xdate()
+                            st.pyplot(fig, use_container_width=False)
 
 
             # Mål 2:
@@ -369,6 +343,7 @@ def cjk_page(afdeling):
                                 
                     """)
 
+
                 with col2:
                     chart_df = df[["Periode", "Antal fuldtidspersoner", "Ydelse"]]
                     chart_df["Antal fuldtidspersoner"] = pd.to_numeric(chart_df["Antal fuldtidspersoner"], errors='coerce')
@@ -400,7 +375,7 @@ def cjk_page(afdeling):
             # Mål 3:
 
             query = (
-                'SELECT "Periode", "Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m", "Opdeling af ydelser", "Område" FROM jobindsats_y25i08 where "Område" IN (\'Randers\', \'Hele landet\') order by "Periode" asc;'
+                'SELECT "Periode", "Andel i beskæftigelse 3, 6, 9 og 12 mdr. efter nyledighed: 6 m", "Opdeling af ydelser", "Område" FROM jobindsats_y25i08 where "Område" IN (\'Randers\', \'Randers\', \'Aarhus\', \'Favrskov\', \'Horsens\', \'Norddjurs\', \'Odder\', \'Samsø\',  \'Skanderborg\',  \'Syddjurs\') order by "Periode" asc;'
             )
 
             result = db_client.execute_sql(query)

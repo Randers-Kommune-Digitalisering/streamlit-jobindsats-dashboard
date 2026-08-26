@@ -16,5 +16,4 @@ def show_forside():
         | ***Ydelser***          | Udvikling i enkeltydelser over tid (under udvikling) |
         | ***Diverse statistikker***    | Diverse løbende grafer og statistikker |
         | ***Datakatalog***                | Katalog over tilgængelige data fra api.jobindsats.dk  | 
-        | ***Om***          | Om denne side |
     """)
