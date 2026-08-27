@@ -50,7 +50,7 @@ def render_vector_downloads(fig, filename_prefix):
     spacer, col1 = st.columns([4, 1])
     with col1:
         st.download_button(
-            label='Download SVG',
+            label='',
             data=svg_buffer.getvalue(),
             file_name=f'{filename_prefix}.svg',
             mime='image/svg+xml',
@@ -64,7 +64,7 @@ def render_vector_downloads_nocol(fig, filename_prefix):
     fig.savefig(svg_buffer, format='svg', bbox_inches='tight')
 
     st.download_button(
-        label='Download SVG',
+        label='',
         data=svg_buffer.getvalue(),
         file_name=f'{filename_prefix}.svg',
         mime='image/svg+xml',
