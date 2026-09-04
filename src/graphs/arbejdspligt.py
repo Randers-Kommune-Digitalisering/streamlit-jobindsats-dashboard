@@ -1,14 +1,9 @@
 import streamlit as st
 import pandas as pd
-import datetime as dt
 from utils.database_connection import get_jobindsats_db
-from matplotlib.ticker import FuncFormatter, MultipleLocator
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-import math
-from io import BytesIO
 
 db_client = get_jobindsats_db()
+
 
 def arbejdspligt():
     st.header("Arbejdspligt")
@@ -117,6 +112,8 @@ def arbejdspligt():
             delta=f"{seneste_andel_indsatsrettet_delta:.2f}%" if seneste_andel_indsatsrettet_delta is not None else None,
             border=True
         )
+
+    db_client.close_connection()
 
     st.markdown("### Hele landet")
 
