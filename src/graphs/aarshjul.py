@@ -98,10 +98,23 @@ def aarshjul():
                         str(today.year - 2): '#FF0000',
                     }
 
-                    budgetpersoner = 1283
+                    budgetpersoner = {
+                        1: 1283,
+                        2: 1283,
+                        3: 1283,
+                        4: 1283,
+                        5: 1283,
+                        6: 1283,
+                        7: 1283,
+                        8: 1283,
+                        9: 1283,
+                        10: 1228,
+                        11: 1228,
+                        12: 1228,
+                    }
                     måneder = MONTHS_DA
                     budget_x = list(måneder.keys())
-                    budget_y = [budgetpersoner] * len(budget_x)
+                    budget_y = [budgetpersoner[måned] for måned in budget_x]
                     ax.plot(budget_x, budget_y, color='#C0C0C0', linestyle='--', linewidth=2, label=f'Budgetpersoner {today.year}')
                     for år, group in df1.groupby("år"):
                         ax.plot(group["måned"], group["Antal fuldtidspersoner"], label=år, linewidth=2, color=colors.get(str(år), 'black'))
