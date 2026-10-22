@@ -23,7 +23,7 @@ with st.sidebar:
                 sac.MenuItem('A-dagpenge og jobformidling', icon='house-door'),
                 sac.MenuItem('Jobparate og integration', icon='house-door'),
                 sac.MenuItem('Fleksjob', icon='house-door'),
-                sac.MenuItem('Sprogcenter', icon='house-door'),
+                sac.MenuItem('Sprogcenter', icon='house-door'),    
             ]),
             sac.MenuItem('Center for Job og Udvikling', icon='building', children=[
                 sac.MenuItem('CJU - fælles mål', icon='bullseye'),
@@ -32,6 +32,7 @@ with st.sidebar:
             ]),
         ]),
         sac.MenuItem('Ydelser', icon='people'),
+        sac.MenuItem('Resultatstyring', icon='bullseye'),
         sac.MenuItem('Diverse statistikker', icon='graph-down-arrow', children=[
             sac.MenuItem('Årshjulsdokumenter', icon='graph-up-arrow'),
             sac.MenuItem('Arbejdspligt', icon='graph-up-arrow'),
@@ -46,6 +47,9 @@ elif selected in ["CJK - fælles mål", "CJU - fælles mål", "Center for Job og
     get_jobranders(selected)
 elif selected == "Ydelser":
     get_ydelser_overview()
+elif selected == "Resultatstyring":
+    st.title("Resultatstyring")
+    st.info("Indhold til resultatstyring kommer her.")
 elif selected in ["Arbejdspligt", "Årshjulsdokumenter"]:
     get_diverse(selected)
 elif selected == "Datakatalog":
